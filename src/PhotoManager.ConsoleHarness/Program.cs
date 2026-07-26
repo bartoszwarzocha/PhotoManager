@@ -22,6 +22,18 @@ if (args.Length > 1 && args[0].Equals("details", StringComparison.OrdinalIgnoreC
     return 0;
 }
 
+if (args.Length > 2 && args[0].Equals("analyze", StringComparison.OrdinalIgnoreCase))
+{
+    var exts = ImportOptions.DefaultExtensions;
+    var files = Importer.EnumeratePhotos(args[1], exts).ToList();
+    var opts = new ImportOptions { DestinationRoot = args[2] };
+    var results = await new Importer().AnalyzeAsync(files, opts);
+    int nowy = results.Count(r => r.Outcome == ImportOutcome.Imported);
+    int dup = results.Count(r => r.Outcome == ImportOutcome.SkippedDuplicate);
+    Console.WriteLine($"Analiza (jak w oknie): nowe={nowy}, duplikaty={dup}, razem={results.Count}");
+    return 0;
+}
+
 if (args.Length > 2 && args[0].Equals("movelib", StringComparison.OrdinalIgnoreCase))
 {
     var mover = new LibraryMover();

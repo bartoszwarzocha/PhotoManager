@@ -10,8 +10,6 @@ namespace PhotoManager.Core.Import;
 /// </summary>
 public sealed class Importer
 {
-    /// <summary>Co ile zaimportowanych plików zapisywać manifest w trakcie (ochrona przed nagłym przerwaniem).</summary>
-    private const int ManifestSaveEvery = 20;
 
     /// <summary>Importuje wszystkie pasujące pliki z <paramref name="sourceRoot"/> zgodnie z <paramref name="options"/>.</summary>
     public Task<ImportReport> ImportAsync(
@@ -35,145 +33,133 @@ public sealed class Importer
         CancellationToken ct = default)
     {
         var report = new ImportReport();
-        var manifest = ImportManifest.Load(options.DestinationRoot);
-        int index = 0;
-        int importedSinceSave = 0;
-
-        try
-        {
-            foreach (var source in files)
-            {
-                ct.ThrowIfCancellationRequested();
-                index++;
-                ImportItemResult result;
-                try
-                {
-                    result = await ProcessFileAsync(source, options, manifest, ct);
-                }
-                catch (OperationCanceledException) { throw; }
-                catch (Exception ex)
-                {
-                    result = new ImportItemResult(source, ImportOutcome.Failed, Message: ex.Message);
-                }
-
-                report.Items.Add(result);
-                if (result.Outcome == ImportOutcome.Imported && result.TargetPath is not null)
-                {
-                    try { report.BytesImported += new FileInfo(result.TargetPath).Length; } catch { }
-
-                    // Zapis manifestu na bieżąco — nawy nagłe przerwanie procesu gubi maks. kilka wpisów.
-                    if (!options.DryRun && ++importedSinceSave >= ManifestSaveEvery)
-                    {
-                        try { manifest.Save(); } catch { }
-                        importedSinceSave = 0;
-                    }
-                }
-
-                progress?.Report(new ImportProgress(index, files.Count, source, result.Outcome));
-            }
-        }
-        finally
-        {
-            // Zapis także przy przerwaniu — to, co zdążyliśmy zaimportować, ma zostać zapamiętane.
-            if (!options.DryRun)
-                manifest.Save();
-        }
-
-        return report;
-    }
-
-    /// <summary>
-    /// Szybka analiza „nowy/duplikat” DO PODGLĄDU — bez kopiowania i (w typowym przypadku)
-    /// bez czytania zawartości plików. Opiera się na indeksie rozmiaru+nazwy w manifeście;
-    /// skrót liczy tylko przy rzadkiej kolizji rozmiaru z inną nazwą. W pełni anulowalna.
-    /// </summary>
-    public async Task<List<ImportItemResult>> AnalyzeAsync(
-        IReadOnlyList<string> files,
-        ImportOptions options,
-        IProgress<ImportProgress>? progress = null,
-        CancellationToken ct = default)
-    {
-        var manifest = ImportManifest.Load(options.DestinationRoot);
-        var results = new List<ImportItemResult>(files.Count);
         int index = 0;
 
         foreach (var source in files)
         {
             ct.ThrowIfCancellationRequested();
             index++;
-
-            long size;
-            try { size = new FileInfo(source).Length; } catch { size = -1; }
-            var name = Path.GetFileName(source);
-
-            var decision = size < 0 ? DedupDecision.New : manifest.FastCheck(name, size);
-            var outcome = decision switch
+            ImportItemResult result;
+            try
             {
-                DedupDecision.Duplicate => ImportOutcome.SkippedDuplicate,
-                DedupDecision.NeedsHash =>
-                    manifest.Contains(await FileHasher.ComputeAsync(source, ct))
-                        ? ImportOutcome.SkippedDuplicate : ImportOutcome.Imported,
-                _ => ImportOutcome.Imported,
-            };
+                result = await ProcessFileAsync(source, options, ct);
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex)
+            {
+                result = new ImportItemResult(source, ImportOutcome.Failed, Message: ex.Message);
+            }
 
-            results.Add(new ImportItemResult(source, outcome));
-            progress?.Report(new ImportProgress(index, files.Count, source, outcome));
+            report.Items.Add(result);
+            if (result.Outcome == ImportOutcome.Imported && result.TargetPath is not null)
+            {
+                try { report.BytesImported += new FileInfo(result.TargetPath).Length; } catch { }
+            }
+
+            progress?.Report(new ImportProgress(index, files.Count, source, result.Outcome));
         }
 
-        return results;
+        return report;
+    }
+
+    /// <summary>
+    /// Analiza „nowy/duplikat” DO PODGLĄDU — PER PLIK, przez porównanie z FIZYCZNĄ biblioteką.
+    /// Dla każdego pliku ustala jego miejsce w bibliotece (folder wg daty + nazwa) i sprawdza,
+    /// czy taki plik tam już leży (ten sam rozmiar). Brak w bibliotece = nowy, choćby był zgrywany
+    /// wcześniej (bo mógł zostać skasowany). Bez rejestru/manifestu. W pełni anulowalna.
+    /// </summary>
+    public Task<List<ImportItemResult>> AnalyzeAsync(
+        IReadOnlyList<string> files,
+        ImportOptions options,
+        IProgress<ImportProgress>? progress = null,
+        CancellationToken ct = default)
+    {
+        // Poza wątkiem UI — czyta datę EXIF każdego pliku (Progress marshaluje zgłoszenia z powrotem).
+        return Task.Run(() =>
+        {
+            var results = new List<ImportItemResult>(files.Count);
+            int index = 0;
+
+            foreach (var source in files)
+            {
+                ct.ThrowIfCancellationRequested();
+                index++;
+
+                var (targetDir, fileName, size) = ResolveTarget(source, options);
+                var outcome = IsSameFilePresent(targetDir, fileName, size)
+                    ? ImportOutcome.SkippedDuplicate
+                    : ImportOutcome.Imported;
+
+                results.Add(new ImportItemResult(source, outcome));
+                progress?.Report(new ImportProgress(index, files.Count, source, outcome));
+            }
+
+            return results;
+        }, ct);
+    }
+
+    /// <summary>Ustala docelowy folder (wg daty), nazwę i rozmiar pliku źródłowego.</summary>
+    private static (string TargetDir, string FileName, long Size) ResolveTarget(string source, ImportOptions options)
+    {
+        long size;
+        try { size = new FileInfo(source).Length; } catch { size = -1; }
+        var date = PhotoMetadata.GetCaptureDate(source);
+        var targetDir = Path.Combine(options.DestinationRoot, BuildSubDir(date, options.FolderPattern));
+        return (targetDir, Path.GetFileName(source), size);
+    }
+
+    /// <summary>
+    /// Czy w folderze docelowym leży już ten sam plik: o tej nazwie (lub jej wariancie „_N" z kolizji)
+    /// i tym samym rozmiarze. To jest właściwe porównanie „aparat ↔ biblioteka”, per plik.
+    /// </summary>
+    private static bool IsSameFilePresent(string targetDir, string fileName, long size)
+    {
+        if (size < 0 || !Directory.Exists(targetDir)) return false;
+
+        var exact = Path.Combine(targetDir, fileName);
+        if (SameSize(exact, size)) return true;
+
+        // Warianty nazwy z wcześniejszych kolizji (DSC001_1.ARW itp.).
+        var stem = Path.GetFileNameWithoutExtension(fileName);
+        var ext = Path.GetExtension(fileName);
+        try
+        {
+            foreach (var candidate in Directory.EnumerateFiles(targetDir, $"{stem}_*{ext}"))
+                if (SameSize(candidate, size)) return true;
+        }
+        catch { /* brak dostępu — traktujemy jak brak */ }
+        return false;
+    }
+
+    private static bool SameSize(string path, long size)
+    {
+        try { return File.Exists(path) && new FileInfo(path).Length == size; } catch { return false; }
     }
 
     private static async Task<ImportItemResult> ProcessFileAsync(
-        string source, ImportOptions options, ImportManifest manifest, CancellationToken ct)
+        string source, ImportOptions options, CancellationToken ct)
     {
-        var fileName = Path.GetFileName(source);
-        long size;
-        try { size = new FileInfo(source).Length; } catch { size = -1; }
-
-        // 1) Szybka deduplikacja bez czytania zawartości (rozmiar+nazwa). Skrót tylko przy kolizji.
-        if (size >= 0)
-        {
-            var decision = manifest.FastCheck(fileName, size);
-            if (decision == DedupDecision.Duplicate)
-                return new ImportItemResult(source, ImportOutcome.SkippedDuplicate, Message: "duplikat (rozmiar+nazwa)");
-            if (decision == DedupDecision.NeedsHash)
-            {
-                var h = await FileHasher.ComputeAsync(source, ct);
-                if (manifest.Contains(h))
-                    return new ImportItemResult(source, ImportOutcome.SkippedDuplicate, Message: "duplikat (skrót)");
-            }
-        }
-
-        // 2) Ustal folder docelowy z daty wykonania.
-        var captureDate = PhotoMetadata.GetCaptureDate(source);
-        var subDir = BuildSubDir(captureDate, options.FolderPattern);
-        var targetDir = Path.Combine(options.DestinationRoot, subDir);
+        var (targetDir, fileName, size) = ResolveTarget(source, options);
         var targetPath = Path.Combine(targetDir, fileName);
 
-        // Tryb próbny: zgłoś decyzję bez dotykania dysku. Dopisujemy do manifestu w pamięci,
-        // żeby wykryć też duplikaty w obrębie tej samej partii (klucz = ścieżka źródła).
+        // Deduplikacja PER PLIK względem fizycznej biblioteki (nazwa/wariant + rozmiar).
+        if (IsSameFilePresent(targetDir, fileName, size))
+            return new ImportItemResult(source, ImportOutcome.SkippedDuplicate, targetPath, "już w bibliotece");
+
+        // Tryb próbny: tylko zgłoś decyzję, bez dotykania dysku.
         if (options.DryRun)
         {
             var wouldBe = File.Exists(targetPath) ? MakeUniquePath(targetDir, fileName) : targetPath;
-            if (size >= 0)
-                manifest.Add(source, new ManifestEntry(source, size, captureDate));
             return new ImportItemResult(source, ImportOutcome.Imported, wouldBe, "próbny");
         }
 
         System.IO.Directory.CreateDirectory(targetDir);
 
-        // 3) Kolizja nazwy w celu: ten sam rozmiar traktujemy jak duplikat, inny → unikalna nazwa.
+        // Ta sama nazwa, inny rozmiar (inne zdjęcie z drugiej karty) → unikalna nazwa, oba zostają.
         if (File.Exists(targetPath))
-        {
-            long existing;
-            try { existing = new FileInfo(targetPath).Length; } catch { existing = -1; }
-            if (existing == size)
-                return new ImportItemResult(source, ImportOutcome.SkippedDuplicate, targetPath,
-                    "już w bibliotece (plik istnieje)");
             targetPath = MakeUniquePath(targetDir, fileName);
-        }
 
-        // 4) Kopiuj i policz skrót w jednym przebiegu (jeden odczyt źródła).
+        // Kopiuj i policz skrót w jednym przebiegu (skrót do ewentualnej weryfikacji).
         var partPath = targetPath + ".part";
         string sourceHash;
         try
@@ -186,7 +172,7 @@ public sealed class Importer
             throw;
         }
 
-        // 5) Weryfikacja (wymuszona przy przenoszeniu — nie kasujemy źródła bez pewnej kopii).
+        // Weryfikacja (wymuszona przy przenoszeniu — nie kasujemy źródła bez pewnej kopii).
         bool verify = options.VerifyAfterCopy || options.Mode == ImportMode.Move;
         if (verify)
         {
@@ -200,21 +186,11 @@ public sealed class Importer
 
         File.Move(partPath, targetPath, overwrite: false);
 
-        // 6) Przy przenoszeniu skasuj źródło — dopiero gdy kopia jest pewna.
+        // Przy przenoszeniu skasuj źródło — dopiero gdy kopia jest pewna.
         if (options.Mode == ImportMode.Move)
             TryDelete(source);
 
-        AddToManifest(manifest, options.DestinationRoot, targetPath, sourceHash, captureDate);
         return new ImportItemResult(source, ImportOutcome.Imported, targetPath);
-    }
-
-    private static void AddToManifest(
-        ImportManifest manifest, string destRoot, string targetPath, string hash, DateTime date)
-    {
-        long size = 0;
-        try { size = new FileInfo(targetPath).Length; } catch { }
-        var rel = Path.GetRelativePath(destRoot, targetPath);
-        manifest.Add(hash, new ManifestEntry(rel, size, date));
     }
 
     /// <summary>Buduje ścieżkę podfolderów z daty; „/” we wzorcu = zagnieżdżenie.</summary>
