@@ -120,7 +120,7 @@ Dane: {3:0.0} MB</value></data>
   <data name="Settings_OnDetect_Preview" xml:space="preserve"><value>Otwórz okno podglądu (zaznaczam sam)</value></data>
   <data name="Settings_OnDetect_Auto" xml:space="preserve"><value>Importuj automatycznie (wg profilu)</value></data>
   <data name="Settings_OnDetect_Notify" xml:space="preserve"><value>Tylko powiadom (dymek)</value></data>
-  <data name="Settings_Verify" xml:space="preserve"><value>Weryfikuj kopię skrótem (zalecane)</value></data>
+  <data name="Settings_Verify" xml:space="preserve"><value>Sprawdzaj, czy kopie są identyczne z oryginałami (bezpieczniej, ale wolniej)</value></data>
   <data name="Settings_Startup" xml:space="preserve"><value>Uruchamiaj przy starcie Windows</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Język</value></data>
   <data name="Settings_Language_Auto" xml:space="preserve"><value>Automatycznie (Windows)</value></data>

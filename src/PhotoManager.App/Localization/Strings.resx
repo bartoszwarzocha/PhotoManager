@@ -127,7 +127,7 @@ Data: {3:0.0} MB</value></data>
   <data name="Settings_OnDetect_Preview" xml:space="preserve"><value>Open the preview window (I select)</value></data>
   <data name="Settings_OnDetect_Auto" xml:space="preserve"><value>Import automatically (by profile)</value></data>
   <data name="Settings_OnDetect_Notify" xml:space="preserve"><value>Only notify (balloon)</value></data>
-  <data name="Settings_Verify" xml:space="preserve"><value>Verify the copy with a checksum (recommended)</value></data>
+  <data name="Settings_Verify" xml:space="preserve"><value>Check that copies are identical to originals (safer, but slower)</value></data>
   <data name="Settings_Startup" xml:space="preserve"><value>Run at Windows startup</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
   <data name="Settings_Language_Auto" xml:space="preserve"><value>Automatic (Windows)</value></data>

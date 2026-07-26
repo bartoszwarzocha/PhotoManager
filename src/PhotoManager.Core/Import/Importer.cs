@@ -10,6 +10,9 @@ namespace PhotoManager.Core.Import;
 /// </summary>
 public sealed class Importer
 {
+    /// <summary>Co ile zaimportowanych plików zapisywać manifest w trakcie (ochrona przed nagłym przerwaniem).</summary>
+    private const int ManifestSaveEvery = 20;
+
     /// <summary>Importuje wszystkie pasujące pliki z <paramref name="sourceRoot"/> zgodnie z <paramref name="options"/>.</summary>
     public Task<ImportReport> ImportAsync(
         string sourceRoot,
@@ -34,6 +37,7 @@ public sealed class Importer
         var report = new ImportReport();
         var manifest = ImportManifest.Load(options.DestinationRoot);
         int index = 0;
+        int importedSinceSave = 0;
 
         try
         {
@@ -56,6 +60,13 @@ public sealed class Importer
                 if (result.Outcome == ImportOutcome.Imported && result.TargetPath is not null)
                 {
                     try { report.BytesImported += new FileInfo(result.TargetPath).Length; } catch { }
+
+                    // Zapis manifestu na bieżąco — nawy nagłe przerwanie procesu gubi maks. kilka wpisów.
+                    if (!options.DryRun && ++importedSinceSave >= ManifestSaveEvery)
+                    {
+                        try { manifest.Save(); } catch { }
+                        importedSinceSave = 0;
+                    }
                 }
 
                 progress?.Report(new ImportProgress(index, files.Count, source, result.Outcome));
