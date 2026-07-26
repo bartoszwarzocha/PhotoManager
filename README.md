@@ -1,89 +1,94 @@
 # PhotoManager
 
-Lekkie narzędzie dla Windows, które działa w tle, wykrywa podłączenie aparatu, telefonu lub
-karty pamięci i proponuje proste operacje na zdjęciach — import z organizacją wg daty,
-deduplikację i podgląd — **bez ciężkiego oprogramowania do katalogowania**.
+***English** · [Polski](README.pl.md)*
 
-Zaprojektowane pod szybki, wygodny import z lustrzanek/bezlusterkowców (testowane na Sony A7 III,
-tryb Mass Storage i MTP) oraz czytników wielogniazdowych.
+A lightweight Windows tool that runs in the background, detects when a camera, phone, or memory
+card is connected, and offers simple photo operations — date-based import, deduplication, and
+preview — **without heavy cataloging software**.
 
-## Funkcje
+Built for fast, convenient importing from DSLR/mirrorless cameras (tested on a Sony A7 III, both
+Mass Storage and MTP modes) and multi-slot card readers.
 
-- **Wykrywanie sprzętu w tle** — dyski wymienne (litera + folder `DCIM`) oraz aparaty/telefony
-  w trybie MTP/PTP (przez Windows Portable Devices). Reakcja na `WM_DEVICECHANGE`.
-- **Szybki import** z organizacją wg daty EXIF do wzorca `RRRR/RRRR-MM-DD` (konfigurowalny).
-- **Deduplikacja bez skanowania całej biblioteki** — rozpoznanie po rozmiarze i nazwie z trwałego
-  manifestu; skrót SHA-256 liczony tylko w razie kolizji. Dla plików RAW oznacza to **zero
-  zbędnego czytania** przy powtórnym imporcie.
-- **Okno podglądu** z listą zdjęć, **miniaturą** i **szczegółami metadanych** (aparat, obiektyw,
-  ISO, przysłona, czas, ogniskowa, wymiary, natywna rozdzielczość RAW, pola Sony). Dwuklik
-  otwiera zdjęcie w skojarzonym programie.
-- **Obsługa wielu kart naraz** — jedno okno z listą źródeł; przełączasz się między nośnikami.
-- **Filtr rozszerzeń** przy imporcie (np. tylko `.arw`).
-- **Kopiuj / Przenieś** z weryfikacją skrótu; przy przenoszeniu źródło kasowane dopiero po
-  pewnej kopii. Operacje w pełni anulowalne.
-- **Dyski przenośne** — czytelny komunikat, gdy biblioteka jest odłączona; odnajdywanie biblioteki
-  po numerze seryjnym woluminu, nawet po zmianie litery dysku.
-- **Przenoszenie biblioteki** między katalogami / na dysk przenośny (z aktualizacją manifestu).
-- **Aplikacja w zasobniku** z własną ikoną, autostartem i `config.json` (profile per urządzenie).
+## Features
 
-## Wymagania
+- **Background device detection** — removable drives (drive letter + `DCIM` folder) and cameras/
+  phones in MTP/PTP mode (via Windows Portable Devices). Reacts to `WM_DEVICECHANGE`.
+- **Fast import** with date-based organization from EXIF into a `YYYY/YYYY-MM-DD` pattern
+  (configurable).
+- **Deduplication without scanning the whole library** — recognized by size and name from a
+  persistent manifest; SHA-256 hashing only on collisions. For RAW files this means **zero
+  redundant reading** on re-import.
+- **Preview window** with a file list, **thumbnail**, and **metadata details** (camera, lens, ISO,
+  aperture, shutter, focal length, dimensions, native RAW resolution, Sony fields). Double-click
+  opens the photo in the associated application.
+- **Multiple cards at once** — a single window with a source list; switch between media.
+- **Extension filter** at import time (e.g. only `.arw`).
+- **Copy / Move** with checksum verification; when moving, the source is deleted only after a
+  verified copy. Operations are fully cancellable.
+- **Removable drives** — a clear message when the library is disconnected; the library is located
+  by volume serial number even if the drive letter changes.
+- **Move the library** between folders / to a removable drive (manifest updated automatically).
+- **System tray app** with a custom icon, autostart, and `config.json` (per-device profiles).
+
+> **Note:** the user interface is currently **Polish only** (localization is planned).
+
+## Requirements
 
 - Windows 10/11
-- .NET SDK 10 (do budowania) lub .NET 10 Desktop Runtime (do uruchomienia opublikowanej wersji)
+- .NET SDK 10 (to build) or the .NET 10 Desktop Runtime (to run a published build)
 
-## Budowanie i uruchomienie
+## Build & run
 
 ```powershell
-# Uruchomienie aplikacji (tacka systemowa)
+# Run the app (system tray)
 dotnet run --project src/PhotoManager.App
 ```
 
-Aplikacja chowa się do zasobnika. Prawy klik na ikonie → **Ustawienia…** i wskaż domyślny folder
-biblioteki. Po podłączeniu karty z folderem `DCIM` otworzy się okno podglądu importu.
+The app minimizes to the tray. Right-click the icon → **Settings** and choose the default library
+folder. When a card with a `DCIM` folder is connected, the import preview window opens.
 
-### Instalacja / aktualizacja lokalna
+### Local install / update
 
 ```powershell
 pwsh -File install.ps1
 ```
 
-Publikuje aplikację, wgrywa do `%LOCALAPPDATA%\Programs\PhotoManager`, tworzy skróty (menu Start
-i pulpit), dodaje wpis autostartu i uruchamia. Konfiguracja: `%APPDATA%\PhotoManager\config.json`.
+Publishes the app, deploys it to `%LOCALAPPDATA%\Programs\PhotoManager`, creates shortcuts (Start
+menu and Desktop), adds an autostart entry, and launches it. Config: `%APPDATA%\PhotoManager\config.json`.
 
-## Struktura
+## Project structure
 
 ```
 src/
-  PhotoManager.Core/            # logika niezależna od GUI
-    Devices/                    # wykrywanie urządzeń, woluminy (serial)
-    Metadata/                   # data i szczegóły EXIF/MakerNotes
-    Import/                     # silnik importu, deduplikacja, manifest, przenoszenie biblioteki
-    Config/                     # config.json, profile urządzeń
-  PhotoManager.App/             # aplikacja WPF w zasobniku
-  PhotoManager.ConsoleHarness/  # tester CLI (wykrywanie, import, diagnostyka metadanych)
-install.ps1                     # publikacja + instalacja lokalna
+  PhotoManager.Core/            # GUI-independent logic
+    Devices/                    # device detection, volumes (serial)
+    Metadata/                   # EXIF/MakerNotes date and details
+    Import/                     # import engine, dedup, manifest, library move
+    Config/                     # config.json, device profiles
+  PhotoManager.App/             # WPF system-tray application
+  PhotoManager.ConsoleHarness/  # CLI harness (detection, import, metadata diagnostics)
+install.ps1                     # publish + local install
 ```
 
-## Tester konsolowy (diagnostyka)
+## Console harness (diagnostics)
 
 ```powershell
-# Podgląd wykrywania urządzeń
+# Watch device detection
 dotnet run --project src/PhotoManager.ConsoleHarness
 
-# Import z linii poleceń (--move, --dry-run)
-dotnet run --project src/PhotoManager.ConsoleHarness -- import D:\DCIM E:\Zdjecia --dry-run
+# Command-line import (--move, --dry-run)
+dotnet run --project src/PhotoManager.ConsoleHarness -- import D:\DCIM E:\Photos --dry-run
 
-# Zrzut wszystkich metadanych / sformatowanych szczegółów pliku
+# Dump all metadata / formatted details of a file
 dotnet run --project src/PhotoManager.ConsoleHarness -- dumpmeta "D:\DCIM\100MSDCF\DSC00190.ARW"
 dotnet run --project src/PhotoManager.ConsoleHarness -- details  "D:\DCIM\100MSDCF\DSC00190.ARW"
 ```
 
-## Technologia
+## Technology
 
-C# / .NET 10, WPF. Zależności: [MediaDevices](https://www.nuget.org/packages/MediaDevices)
+C# / .NET 10, WPF. Dependencies: [MediaDevices](https://www.nuget.org/packages/MediaDevices)
 (MTP/WPD), [MetadataExtractor](https://www.nuget.org/packages/MetadataExtractor) (EXIF).
 
-## Licencja
+## License
 
 [MIT](LICENSE) © Bartosz Warzocha
