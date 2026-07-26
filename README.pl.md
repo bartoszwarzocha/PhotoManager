@@ -29,10 +29,16 @@ tryb Mass Storage i MTP) oraz czytników wielogniazdowych.
 - **Przenoszenie biblioteki** między katalogami / na dysk przenośny (z aktualizacją manifestu).
 - **Aplikacja w zasobniku** z własną ikoną, autostartem i `config.json` (profile per urządzenie).
 
+## Pobierz
+
+Najnowszą **samodzielną** wersję pobierzesz ze strony
+[Releases](https://github.com/bartoszwarzocha/PhotoManager/releases) — rozpakuj i uruchom
+`PhotoManager.App.exe`. Nie wymaga instalacji .NET. Interfejs PL/EN.
+
 ## Wymagania
 
 - Windows 10/11
-- .NET SDK 10 (do budowania) lub .NET 10 Desktop Runtime (do uruchomienia opublikowanej wersji)
+- Do budowania ze źródeł: .NET SDK 10
 
 ## Budowanie i uruchomienie
 

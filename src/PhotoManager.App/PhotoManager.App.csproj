@@ -12,6 +12,9 @@
     <AssemblyName>PhotoManager.App</AssemblyName>
     <RootNamespace>PhotoManager.App</RootNamespace>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>PhotoManager</Product>
+    <Company>Bartosz Warzocha</Company>
   </PropertyGroup>
 
   <ItemGroup>

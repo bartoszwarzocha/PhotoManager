@@ -32,10 +32,16 @@ Mass Storage and MTP modes) and multi-slot card readers.
 
 > **Note:** the user interface is currently **Polish only** (localization is planned).
 
+## Download
+
+Grab the latest **self-contained** build from the
+[Releases](https://github.com/bartoszwarzocha/PhotoManager/releases) page — unzip and run
+`PhotoManager.App.exe`. No .NET installation required. UI in Polish/English.
+
 ## Requirements
 
 - Windows 10/11
-- .NET SDK 10 (to build) or the .NET 10 Desktop Runtime (to run a published build)
+- To build from source: .NET SDK 10
 
 ## Build & run
 
