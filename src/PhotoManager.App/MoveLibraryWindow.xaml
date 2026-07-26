@@ -1,0 +1,48 @@
+<Window x:Class="PhotoManager.App.MoveLibraryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Przenieś bibliotekę — PhotoManager" Height="320" Width="620"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Biblioteka (skąd):" VerticalAlignment="Center" Margin="0,0,8,8" />
+        <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SourceBox" VerticalAlignment="Center" Margin="0,0,0,8" />
+        <Button    Grid.Row="0" Grid.Column="2" Content="Zmień…" Padding="10,3" Margin="8,0,0,8" Click="ChangeSource_Click" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Nowa lokalizacja (dokąd):" VerticalAlignment="Center" Margin="0,0,8,8" />
+        <TextBox   Grid.Row="1" Grid.Column="1" x:Name="DestBox" VerticalAlignment="Center" Margin="0,0,0,8" />
+        <Button    Grid.Row="1" Grid.Column="2" Content="Zmień…" Padding="10,3" Margin="8,0,0,8" Click="ChangeDest_Click" />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Foreground="Gray" TextWrapping="Wrap" Margin="0,0,0,8"
+                   Text="Przeniesie całą bibliotekę wraz z rejestrem duplikatów. Na tym samym dysku jest to natychmiastowe; na inny dysk (np. przenośny) pliki są kopiowane z weryfikacją, a źródło kasowane dopiero po pełnym, poprawnym skopiowaniu." />
+
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,4,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ProgressBar Grid.Column="0" x:Name="Progress" Height="18" Minimum="0" Maximum="100" />
+            <TextBlock   Grid.Column="1" x:Name="StatusText" Margin="10,0,0,0" VerticalAlignment="Center" />
+        </Grid>
+
+        <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="CancelButton" Content="Przerwij" Padding="10,4" Margin="0,0,8,0" Click="Cancel_Click" IsEnabled="False" />
+            <Button x:Name="MoveButton" Content="Przenieś" Padding="16,4" Margin="0,0,8,0" Click="Move_Click" />
+            <Button x:Name="CloseButton" Content="Zamknij" Padding="12,4" Click="Close_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

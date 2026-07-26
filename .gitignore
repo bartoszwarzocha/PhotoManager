@@ -1,0 +1,21 @@
+# .NET build output
+bin/
+obj/
+dist/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+# IDE
+.vs/
+.idea/
+*.suo
+
+# NuGet
+*.nupkg
+packages/
+
+# Runtime
+*.log
+config.json
+manifest.json

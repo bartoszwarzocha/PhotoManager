@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <!-- WinForms tylko dla ikony w zasobniku (NotifyIcon) -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>PhotoManager.App</AssemblyName>
+    <RootNamespace>PhotoManager.App</RootNamespace>
+    <ApplicationIcon>appicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PhotoManager.Core\PhotoManager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ta sama ikona ładowana w runtime do zasobnika (NotifyIcon) -->
+    <EmbeddedResource Include="appicon.ico" />
+  </ItemGroup>
+
+</Project>
