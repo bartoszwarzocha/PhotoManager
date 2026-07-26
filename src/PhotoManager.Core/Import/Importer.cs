@@ -86,7 +86,7 @@ public sealed class Importer
                 index++;
 
                 var (targetDir, fileName, size) = ResolveTarget(source, options);
-                var outcome = IsSameFilePresent(targetDir, fileName, size)
+                var outcome = IsSameFilePresentAsync(source, targetDir, fileName, size, options, ct).GetAwaiter().GetResult()
                     ? ImportOutcome.SkippedDuplicate
                     : ImportOutcome.Imported;
 
@@ -110,25 +110,40 @@ public sealed class Importer
 
     /// <summary>
     /// Czy w folderze docelowym leży już ten sam plik: o tej nazwie (lub jej wariancie „_N" z kolizji)
-    /// i tym samym rozmiarze. To jest właściwe porównanie „aparat ↔ biblioteka”, per plik.
+    /// i tym samym rozmiarze. Właściwe porównanie „aparat ↔ biblioteka”, per plik. Gdy włączona
+    /// <see cref="ImportOptions.VerifyDuplicateContent"/>, dopasowanie rozmiaru potwierdzane jest
+    /// skrótem — plik uszkodzony/inny (ta sama nazwa+rozmiar, inna zawartość) NIE jest duplikatem.
     /// </summary>
-    private static bool IsSameFilePresent(string targetDir, string fileName, long size)
+    private static async Task<bool> IsSameFilePresentAsync(
+        string source, string targetDir, string fileName, long size, ImportOptions options, CancellationToken ct)
     {
         if (size < 0 || !Directory.Exists(targetDir)) return false;
 
+        // Kandydaci: dokładna nazwa + warianty „_N" z wcześniejszych kolizji, o tym samym rozmiarze.
+        var candidates = new List<string>();
         var exact = Path.Combine(targetDir, fileName);
-        if (SameSize(exact, size)) return true;
+        if (SameSize(exact, size)) candidates.Add(exact);
 
-        // Warianty nazwy z wcześniejszych kolizji (DSC001_1.ARW itp.).
         var stem = Path.GetFileNameWithoutExtension(fileName);
         var ext = Path.GetExtension(fileName);
         try
         {
-            foreach (var candidate in Directory.EnumerateFiles(targetDir, $"{stem}_*{ext}"))
-                if (SameSize(candidate, size)) return true;
+            foreach (var c in Directory.EnumerateFiles(targetDir, $"{stem}_*{ext}"))
+                if (SameSize(c, size)) candidates.Add(c);
         }
-        catch { /* brak dostępu — traktujemy jak brak */ }
-        return false;
+        catch { /* brak dostępu — traktujemy jak brak kandydatów */ }
+
+        if (candidates.Count == 0) return false;
+        if (!options.VerifyDuplicateContent) return true; // sam rozmiar wystarcza
+
+        // Potwierdzenie zawartością: źródło musi być identyczne z którymś kandydatem.
+        var sourceHash = await FileHasher.ComputeAsync(source, ct);
+        foreach (var c in candidates)
+        {
+            try { if (await FileHasher.ComputeAsync(c, ct) == sourceHash) return true; }
+            catch { /* nieczytelny kandydat — pomijamy */ }
+        }
+        return false; // rozmiar się zgadza, ale zawartość różna → uszkodzony/inny, zgraj dobry
     }
 
     private static bool SameSize(string path, long size)
@@ -142,8 +157,8 @@ public sealed class Importer
         var (targetDir, fileName, size) = ResolveTarget(source, options);
         var targetPath = Path.Combine(targetDir, fileName);
 
-        // Deduplikacja PER PLIK względem fizycznej biblioteki (nazwa/wariant + rozmiar).
-        if (IsSameFilePresent(targetDir, fileName, size))
+        // Deduplikacja PER PLIK względem fizycznej biblioteki (nazwa/wariant + rozmiar; opcjonalnie zawartość).
+        if (await IsSameFilePresentAsync(source, targetDir, fileName, size, options, ct))
             return new ImportItemResult(source, ImportOutcome.SkippedDuplicate, targetPath, "już w bibliotece");
 
         // Tryb próbny: tylko zgłoś decyzję, bez dotykania dysku.

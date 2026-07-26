@@ -22,6 +22,9 @@ public sealed class AppConfig
     /// <summary>Po skopiowaniu weryfikować kopię skrótem.</summary>
     public bool VerifyAfterCopy { get; set; } = true;
 
+    /// <summary>Przy duplikacie porównywać zawartość skrótem (wykrywa uszkodzone kopie w bibliotece).</summary>
+    public bool VerifyDuplicateContent { get; set; } = false;
+
     /// <summary>Uruchamiać się z Windows (obsłuż w aplikacji przez wpis w rejestrze/Autostart).</summary>
     public bool RunAtStartup { get; set; } = false;
 
@@ -119,6 +122,7 @@ public sealed class AppConfig
             FolderPattern = profile?.FolderPattern is { Length: > 0 } p ? p : FolderPattern,
             Mode = mode,
             VerifyAfterCopy = VerifyAfterCopy,
+            VerifyDuplicateContent = VerifyDuplicateContent,
             Extensions = ExtensionSet(),
             DryRun = dryRun,
         };

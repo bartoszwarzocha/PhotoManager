@@ -32,6 +32,7 @@ public partial class SettingsWindow : Window
             _ => 0,
         };
         VerifyCheck.IsChecked = config.VerifyAfterCopy;
+        VerifyDupCheck.IsChecked = config.VerifyDuplicateContent;
         StartupCheck.IsChecked = config.RunAtStartup;
         LanguageCombo.SelectedIndex = config.Language?.ToLowerInvariant() switch
         {
@@ -109,6 +110,7 @@ public partial class SettingsWindow : Window
             _ => OnDetectAction.ShowPreview,
         };
         _config.VerifyAfterCopy = VerifyCheck.IsChecked == true;
+        _config.VerifyDuplicateContent = VerifyDupCheck.IsChecked == true;
         _config.RunAtStartup = StartupCheck.IsChecked == true;
         _config.Language = LanguageCombo.SelectedIndex switch { 1 => "pl", 2 => "en", _ => "auto" };
         _config.Extensions = ParseExtensions(ExtBox.Text);

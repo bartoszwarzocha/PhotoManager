@@ -122,6 +122,7 @@ Dane: {3:0.0} MB</value></data>
   <data name="Settings_OnDetect_Notify" xml:space="preserve"><value>Tylko powiadom (dymek)</value></data>
   <data name="Settings_Verify" xml:space="preserve"><value>Sprawdzaj, czy kopie są identyczne z oryginałami (bezpieczniej, ale wolniej)</value></data>
   <data name="Settings_Startup" xml:space="preserve"><value>Uruchamiaj przy starcie Windows</value></data>
+  <data name="Settings_VerifyDup" xml:space="preserve"><value>Sprawdzaj zawartość duplikatów (wykrywa uszkodzone kopie w bibliotece; wolniej)</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Język</value></data>
   <data name="Settings_Language_Auto" xml:space="preserve"><value>Automatycznie (Windows)</value></data>
   <data name="Settings_PreviewExample" xml:space="preserve"><value>Przykład:  DSC00123.ARW  →  {0}\DSC00123.ARW</value></data>

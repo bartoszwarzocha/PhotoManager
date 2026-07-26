@@ -135,7 +135,11 @@ public partial class ImportPreviewWindow : Window
             Importer.EnumeratePhotos(_source, exts).AsParallel().AsOrdered()
                 .Select(p => new FileRow(p)).ToList());
 
-        foreach (var r in rows) _rows.Add(r);
+        foreach (var r in rows)
+        {
+            r.PropertyChanged += Row_PropertyChanged; // odśwież licznik przy ręcznym (od)znaczaniu
+            _rows.Add(r);
+        }
         BuildExtensionFilter();
         UpdateSelectionInfo();
 
@@ -243,6 +247,7 @@ public partial class ImportPreviewWindow : Window
         {
             DestinationRoot = dest,
             FolderPattern = _config.FolderPattern,
+            VerifyDuplicateContent = _config.VerifyDuplicateContent,
         };
         var paths = _rows.Select(r => r.Path).ToList();
 
@@ -359,6 +364,7 @@ public partial class ImportPreviewWindow : Window
             FolderPattern = _config.FolderPattern,
             Mode = mode,
             VerifyAfterCopy = _config.VerifyAfterCopy,
+            VerifyDuplicateContent = _config.VerifyDuplicateContent,
         };
 
         _cts = new CancellationTokenSource();
@@ -505,6 +511,12 @@ public partial class ImportPreviewWindow : Window
         ImportButton.IsEnabled = !busy && _rows.Count > 0;
         CloseButton.IsEnabled = !busy || allowClose;
         SourceCombo.IsEnabled = !busy; // nie przełączaj źródła w trakcie operacji
+    }
+
+    private void Row_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(FileRow.Selected))
+            UpdateSelectionInfo();
     }
 
     private void UpdateSelectionInfo()

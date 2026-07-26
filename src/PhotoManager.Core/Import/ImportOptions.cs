@@ -25,8 +25,15 @@ public sealed record ImportOptions
     /// <summary>Po skopiowaniu policz skrót pliku docelowego i porównaj ze źródłem. Wymagane przy przenoszeniu.</summary>
     public bool VerifyAfterCopy { get; init; } = true;
 
-    /// <summary>Tryb próbny: analizuj i raportuj decyzje (import/duplikat), ale nie kopiuj, nie przenoś, nie zapisuj manifestu.</summary>
+    /// <summary>Tryb próbny: analizuj i raportuj decyzje (import/duplikat), ale nie kopiuj i nie przenoś.</summary>
     public bool DryRun { get; init; } = false;
+
+    /// <summary>
+    /// Przy duplikacie (ta sama nazwa+rozmiar w bibliotece) porównaj dodatkowo ZAWARTOŚĆ skrótem.
+    /// Jeśli różna (uszkodzony/inny plik), potraktuj jako nowy i zgraj dobry z karty. Wolniej (hashuje
+    /// duplikaty), ale chroni przed uszkodzoną kopią w bibliotece.
+    /// </summary>
+    public bool VerifyDuplicateContent { get; init; } = false;
 
     /// <summary>Rozszerzenia traktowane jako zdjęcia/filmy (z kropką, małe litery).</summary>
     public IReadOnlySet<string> Extensions { get; init; } = DefaultExtensions;

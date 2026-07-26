@@ -49,8 +49,9 @@
                         <ComboBoxItem Content="English" />
                     </ComboBox>
 
-                    <CheckBox x:Name="VerifyCheck"  Content="{loc:T Settings_Verify}" Margin="0,0,0,8" />
-                    <CheckBox x:Name="StartupCheck" Content="{loc:T Settings_Startup}" />
+                    <CheckBox x:Name="VerifyCheck"    Content="{loc:T Settings_Verify}" Margin="0,0,0,8" />
+                    <CheckBox x:Name="VerifyDupCheck" Content="{loc:T Settings_VerifyDup}" Margin="0,0,0,8" />
+                    <CheckBox x:Name="StartupCheck"   Content="{loc:T Settings_Startup}" />
                 </StackPanel>
             </TabItem>
 

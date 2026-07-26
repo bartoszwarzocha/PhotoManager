@@ -26,7 +26,8 @@ if (args.Length > 2 && args[0].Equals("analyze", StringComparison.OrdinalIgnoreC
 {
     var exts = ImportOptions.DefaultExtensions;
     var files = Importer.EnumeratePhotos(args[1], exts).ToList();
-    var opts = new ImportOptions { DestinationRoot = args[2] };
+    var verifyDup = args.Any(a => a.Equals("--verify-dup", StringComparison.OrdinalIgnoreCase));
+    var opts = new ImportOptions { DestinationRoot = args[2], VerifyDuplicateContent = verifyDup };
     var results = await new Importer().AnalyzeAsync(files, opts);
     int nowy = results.Count(r => r.Outcome == ImportOutcome.Imported);
     int dup = results.Count(r => r.Outcome == ImportOutcome.SkippedDuplicate);
