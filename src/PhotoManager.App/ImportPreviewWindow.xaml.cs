@@ -384,6 +384,7 @@ public partial class ImportPreviewWindow : Window
                     _ => row.State,
                 };
                 if (oc == ImportOutcome.Imported) row.Selected = false;
+                FilesGrid.ScrollIntoView(row); // podążaj widokiem za postępem
             }
         });
 

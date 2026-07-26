@@ -5,12 +5,15 @@ namespace PhotoManager.Core.Import;
 /// <summary>Liczy skrót zawartości pliku — używany do pewnej deduplikacji i weryfikacji kopii.</summary>
 public static class FileHasher
 {
+    // Bufor 4 MB + podpowiedź „odczyt sekwencyjny" — lepsze wczytywanie z wyprzedzeniem z kart/dysków.
+    private const int BufferSize = 1 << 22;
+    private const FileOptions ReadOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
+
     /// <summary>Skrót SHA-256 pliku jako hex (małe litery). Strumieniowo, bez ładowania całości do pamięci.</summary>
     public static async Task<string> ComputeAsync(string filePath, CancellationToken ct = default)
     {
         await using var stream = new FileStream(
-            filePath, FileMode.Open, FileAccess.Read, FileShare.Read,
-            bufferSize: 1 << 20, useAsync: true);
+            filePath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, ReadOptions);
 
         using var sha = SHA256.Create();
         var hash = await sha.ComputeHashAsync(stream, ct);
@@ -24,12 +27,12 @@ public static class FileHasher
     public static async Task<string> CopyAndHashAsync(string source, string dest, CancellationToken ct = default)
     {
         using var sha = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var buffer = new byte[1 << 20];
+        var buffer = new byte[BufferSize];
 
         await using var src = new FileStream(
-            source, FileMode.Open, FileAccess.Read, FileShare.Read, buffer.Length, useAsync: true);
+            source, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, ReadOptions);
         await using var dst = new FileStream(
-            dest, FileMode.Create, FileAccess.Write, FileShare.None, buffer.Length, useAsync: true);
+            dest, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous);
 
         int read;
         while ((read = await src.ReadAsync(buffer, ct)) > 0)
