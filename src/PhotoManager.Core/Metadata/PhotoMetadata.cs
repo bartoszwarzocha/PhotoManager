@@ -54,8 +54,9 @@ public static class PhotoMetadata
     }
 
     /// <summary>
-    /// Zwraca czytelne szczegóły z metadanych zdjęcia (aparat, obiektyw, ISO, przysłona, czas,
-    /// ogniskowa, wymiary, data) do panelu podglądu. Puste wartości pomija; nigdy nie rzuca.
+    /// Zwraca szczegóły z metadanych zdjęcia do panelu podglądu. <c>Label</c> to stabilny token
+    /// (np. „Camera", „Lens") — niezależny od języka; aplikacja tłumaczy go na etykietę.
+    /// Puste wartości pomija; nigdy nie rzuca.
     /// </summary>
     public static IReadOnlyList<(string Label, string Value)> GetDetails(string filePath)
     {
@@ -71,36 +72,36 @@ public static class PhotoMetadata
                 Find(dirs, ExifDirectoryBase.TagMake),
                 Find(dirs, ExifDirectoryBase.TagModel),
             }.Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
-            Add(items, "Aparat", camera);
+            Add(items, "Camera", camera);
 
-            Add(items, "Obiektyw", Find(dirs, ExifDirectoryBase.TagLensModel));
-            Add(items, "Ogniskowa", Find(dirs, ExifDirectoryBase.TagFocalLength));
-            Add(items, "Przysłona", Find(dirs, ExifDirectoryBase.TagFNumber));
-            Add(items, "Czas", Find(dirs, ExifDirectoryBase.TagExposureTime));
-            Add(items, "ISO", Find(dirs, ExifDirectoryBase.TagIsoEquivalent));
-            Add(items, "Tryb", Find(dirs, ExifDirectoryBase.TagExposureProgram));
-            Add(items, "Pomiar", Find(dirs, ExifDirectoryBase.TagMeteringMode));
-            Add(items, "Balans bieli", Find(dirs, ExifDirectoryBase.TagWhiteBalance));
-            Add(items, "Lampa", Find(dirs, ExifDirectoryBase.TagFlash));
+            Add(items, "Lens", Find(dirs, ExifDirectoryBase.TagLensModel));
+            Add(items, "FocalLength", Find(dirs, ExifDirectoryBase.TagFocalLength));
+            Add(items, "Aperture", Find(dirs, ExifDirectoryBase.TagFNumber));
+            Add(items, "Shutter", Find(dirs, ExifDirectoryBase.TagExposureTime));
+            Add(items, "Iso", Find(dirs, ExifDirectoryBase.TagIsoEquivalent));
+            Add(items, "Mode", Find(dirs, ExifDirectoryBase.TagExposureProgram));
+            Add(items, "Metering", Find(dirs, ExifDirectoryBase.TagMeteringMode));
+            Add(items, "WhiteBalance", Find(dirs, ExifDirectoryBase.TagWhiteBalance));
+            Add(items, "Flash", Find(dirs, ExifDirectoryBase.TagFlash));
 
             // Pola specyficzne dla Sony (z MakerNotes) — tylko z katalogu Sony, by uniknąć kolizji tagów.
-            Add(items, "Ostrość", FindInType<SonyType1MakernoteDirectory>(dirs, 0x201B));       // Focus Mode
-            Add(items, "Stabilizacja", FindInType<SonyType1MakernoteDirectory>(dirs, 0xB026));  // Image Stabilisation
-            Add(items, "DRO", FindInType<SonyType1MakernoteDirectory>(dirs, 0xB025));           // Dynamic Range Optimizer
+            Add(items, "Focus", FindInType<SonyType1MakernoteDirectory>(dirs, 0x201B));         // Focus Mode
+            Add(items, "Stabilization", FindInType<SonyType1MakernoteDirectory>(dirs, 0xB026)); // Image Stabilisation
+            Add(items, "Dro", FindInType<SonyType1MakernoteDirectory>(dirs, 0xB025));           // Dynamic Range Optimizer
 
             // Wymiary wyjściowe (jak w JPG) oraz — dla RAW — natywna klatka matrycy.
             int? w = FindInt(dirs, ExifDirectoryBase.TagExifImageWidth);
             int? h = FindInt(dirs, ExifDirectoryBase.TagExifImageHeight);
             if (w is int ww && h is int hh)
-                Add(items, "Wymiary", $"{ww} × {hh}");
+                Add(items, "Dimensions", $"{ww} × {hh}");
 
             int? rw = FindInt(dirs, ExifDirectoryBase.TagImageWidth);
             int? rh = FindInt(dirs, ExifDirectoryBase.TagImageHeight);
             if (rw is int rww && rh is int rhh && (rww != w || rhh != h))
-                Add(items, "Matryca", $"{rww} × {rhh}");
+                Add(items, "Sensor", $"{rww} × {rhh}");
 
             if (FindDate(dirs, ExifDirectoryBase.TagDateTimeOriginal) is { } dt)
-                Add(items, "Wykonano", dt.ToString("yyyy-MM-dd HH:mm:ss"));
+                Add(items, "Taken", dt.ToString("yyyy-MM-dd HH:mm:ss"));
         }
         catch
         {

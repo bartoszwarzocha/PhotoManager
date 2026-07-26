@@ -25,6 +25,9 @@ public sealed class AppConfig
     /// <summary>Uruchamiać się z Windows (obsłuż w aplikacji przez wpis w rejestrze/Autostart).</summary>
     public bool RunAtStartup { get; set; } = false;
 
+    /// <summary>Język interfejsu: „auto" (wg Windows), „pl" lub „en".</summary>
+    public string Language { get; set; } = "auto";
+
     /// <summary>Domyślny tryb importu (Kopiuj/Przenieś) proponowany w oknie podglądu.</summary>
     public ImportMode DefaultMode { get; set; } = ImportMode.Copy;
 

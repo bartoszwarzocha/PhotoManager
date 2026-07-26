@@ -5,6 +5,7 @@ using System.Windows;
 using PhotoManager.Core.Config;
 using PhotoManager.Core.Devices;
 using PhotoManager.Core.Import;
+using L = PhotoManager.App.Localization.Loc;
 
 namespace PhotoManager.App;
 
@@ -32,6 +33,12 @@ public partial class SettingsWindow : Window
         };
         VerifyCheck.IsChecked = config.VerifyAfterCopy;
         StartupCheck.IsChecked = config.RunAtStartup;
+        LanguageCombo.SelectedIndex = config.Language?.ToLowerInvariant() switch
+        {
+            "pl" => 1,
+            "en" => 2,
+            _ => 0,
+        };
         UpdatePreview();
 
         // --- Rozszerzenia ---
@@ -64,15 +71,15 @@ public partial class SettingsWindow : Window
         }
         catch
         {
-            PreviewText.Text = "Przykład: (niepoprawny wzorzec)";
+            PreviewText.Text = L.Get("Settings_PreviewInvalid");
             return;
         }
-        PreviewText.Text = $"Przykład:  DSC00123.ARW  →  {sub}\\DSC00123.ARW";
+        PreviewText.Text = L.Get("Settings_PreviewExample", sub);
     }
 
     private void ChangeDest_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Domyślny folder biblioteki" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = L.Get("Settings_DefaultLibraryTitle") };
         if (!string.IsNullOrEmpty(DestBox.Text) && Directory.Exists(DestBox.Text))
             dlg.InitialDirectory = DestBox.Text;
         if (dlg.ShowDialog() == true)
@@ -103,6 +110,7 @@ public partial class SettingsWindow : Window
         };
         _config.VerifyAfterCopy = VerifyCheck.IsChecked == true;
         _config.RunAtStartup = StartupCheck.IsChecked == true;
+        _config.Language = LanguageCombo.SelectedIndex switch { 1 => "pl", 2 => "en", _ => "auto" };
         _config.Extensions = ParseExtensions(ExtBox.Text);
 
         _config.Devices.Clear();

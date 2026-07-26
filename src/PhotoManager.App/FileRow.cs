@@ -1,7 +1,11 @@
 using System.ComponentModel;
 using System.IO;
+using PhotoManager.App.Localization;
 
 namespace PhotoManager.App;
+
+/// <summary>Logiczny stan wiersza (niezależny od języka).</summary>
+public enum RowStatus { Pending, Unknown, New, Duplicate, Copied, Moved, Error }
 
 /// <summary>Jeden plik na liście podglądu importu (z zaznaczeniem i statusem analizy).</summary>
 public sealed class FileRow : INotifyPropertyChanged
@@ -25,12 +29,24 @@ public sealed class FileRow : INotifyPropertyChanged
         set { if (_selected != value) { _selected = value; OnChanged(nameof(Selected)); } }
     }
 
-    private string _status = "…";
-    public string Status
+    private RowStatus _state = RowStatus.Pending;
+    public RowStatus State
     {
-        get => _status;
-        set { if (_status != value) { _status = value; OnChanged(nameof(Status)); } }
+        get => _state;
+        set { if (_state != value) { _state = value; OnChanged(nameof(State)); OnChanged(nameof(Status)); } }
     }
+
+    /// <summary>Tekst statusu w bieżącym języku (do wyświetlenia w tabeli).</summary>
+    public string Status => _state switch
+    {
+        RowStatus.New => Loc.Get("Status_New"),
+        RowStatus.Duplicate => Loc.Get("Status_Duplicate"),
+        RowStatus.Copied => Loc.Get("Status_Copied"),
+        RowStatus.Moved => Loc.Get("Status_Moved"),
+        RowStatus.Error => Loc.Get("Status_Error"),
+        RowStatus.Unknown => Loc.Get("Status_Unknown"),
+        _ => Loc.Get("Status_Pending"),
+    };
 
     public string DateDisplay => Date == default ? "" : Date.ToString("yyyy-MM-dd HH:mm");
     public string SizeDisplay => FormatSize(SizeBytes);

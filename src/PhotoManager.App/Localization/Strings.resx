@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Tray -->
+  <data name="Tray_Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Tray_ImportManual" xml:space="preserve"><value>Import manually…</value></data>
+  <data name="Tray_MoveLibrary" xml:space="preserve"><value>Move library…</value></data>
+  <data name="Tray_Settings" xml:space="preserve"><value>Settings…</value></data>
+  <data name="Tray_Exit" xml:space="preserve"><value>Exit</value></data>
+
+  <!-- Startup / detection balloons -->
+  <data name="Startup_ConfigTitle" xml:space="preserve"><value>PhotoManager — setup</value></data>
+  <data name="Startup_ConfigMsg" xml:space="preserve"><value>Set a destination folder to get started.</value></data>
+  <data name="Startup_RunningMsg" xml:space="preserve"><value>Running in the background. Connect a camera or card.</value></data>
+  <data name="Detect_Title" xml:space="preserve"><value>Photo media detected</value></data>
+  <data name="Detect_NotifyOnly" xml:space="preserve"><value>{0} — click the icon to import.</value></data>
+  <data name="Detect_AutoImport" xml:space="preserve"><value>{0} — importing automatically…</value></data>
+  <data name="Detect_ShowPreview" xml:space="preserve"><value>{0} — opening import preview…</value></data>
+  <data name="AutoImport_DoneTitle" xml:space="preserve"><value>Import finished</value></data>
+  <data name="AutoImport_DoneMsg" xml:space="preserve"><value>{0}: new {1}, duplicates {2}, errors {3}.</value></data>
+  <data name="AutoImport_FailTitle" xml:space="preserve"><value>Import failed</value></data>
+  <data name="Manual_PickTitle" xml:space="preserve"><value>Choose a folder with photos (e.g. E:\DCIM)</value></data>
+  <data name="Manual_Prefix" xml:space="preserve"><value>Manual: {0}</value></data>
+  <data name="Manual_Default" xml:space="preserve"><value>Manual selection</value></data>
+
+  <!-- Import preview window -->
+  <data name="Preview_Title" xml:space="preserve"><value>Import photos</value></data>
+  <data name="Preview_Source" xml:space="preserve"><value>Source:</value></data>
+  <data name="Preview_Destination" xml:space="preserve"><value>Destination folder:</value></data>
+  <data name="Common_Change" xml:space="preserve"><value>Change…</value></data>
+  <data name="Common_Copy" xml:space="preserve"><value>Copy</value></data>
+  <data name="Common_Move" xml:space="preserve"><value>Move</value></data>
+  <data name="Col_Import" xml:space="preserve"><value>Import</value></data>
+  <data name="Col_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Col_Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Col_Size" xml:space="preserve"><value>Size</value></data>
+  <data name="Col_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Preview_Hint" xml:space="preserve"><value>Select a photo to see the preview</value></data>
+  <data name="Btn_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Btn_SelectNew" xml:space="preserve"><value>Select new</value></data>
+  <data name="Btn_ImportSelected" xml:space="preserve"><value>Import selected</value></data>
+  <data name="Btn_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Filter_Show" xml:space="preserve"><value>Show:</value></data>
+
+  <!-- Statuses -->
+  <data name="Status_Pending" xml:space="preserve"><value>…</value></data>
+  <data name="Status_Unknown" xml:space="preserve"><value>?</value></data>
+  <data name="Status_New" xml:space="preserve"><value>new</value></data>
+  <data name="Status_Duplicate" xml:space="preserve"><value>duplicate</value></data>
+  <data name="Status_Copied" xml:space="preserve"><value>copied</value></data>
+  <data name="Status_Moved" xml:space="preserve"><value>moved</value></data>
+  <data name="Status_Error" xml:space="preserve"><value>error</value></data>
+
+  <!-- Preview messages -->
+  <data name="Msg_LoadingList" xml:space="preserve"><value>Loading list…</value></data>
+  <data name="Msg_NoPhotos" xml:space="preserve"><value>No photos in this folder.</value></data>
+  <data name="Msg_AnalyzingDup" xml:space="preserve"><value>Analyzing duplicates…</value></data>
+  <data name="Msg_PickDestForDup" xml:space="preserve"><value>Choose a destination folder to detect duplicates.</value></data>
+  <data name="Msg_LibDriveOffline" xml:space="preserve"><value>⚠ Library drive ({0}) is disconnected — connect it to detect duplicates and import.</value></data>
+  <data name="Msg_DestNotExist" xml:space="preserve"><value>The destination folder does not exist yet — all photos will be new.</value></data>
+  <data name="Msg_DoneDupes" xml:space="preserve"><value>Done. Duplicates: {0} (deselected).</value></data>
+  <data name="Msg_DoneAllNew" xml:space="preserve"><value>Done. All photos are new.</value></data>
+  <data name="Msg_NoMedia" xml:space="preserve"><value>No media connected. Connect a camera card.</value></data>
+  <data name="Msg_Selected" xml:space="preserve"><value>Selected {0} of {1}</value></data>
+  <data name="Msg_PickDest" xml:space="preserve"><value>Choose a destination folder.</value></data>
+  <data name="Msg_NoneSelected" xml:space="preserve"><value>No files selected.</value></data>
+  <data name="Msg_ConfirmMove" xml:space="preserve"><value>Move {0} files? After a verified copy they will be deleted from the media.</value></data>
+  <data name="Title_ConfirmMove" xml:space="preserve"><value>Confirm move</value></data>
+  <data name="Msg_DestDriveOffline" xml:space="preserve"><value>Library drive ({0}) is disconnected.
+Connect it and try again.</value></data>
+  <data name="Msg_CantCreateDest" xml:space="preserve"><value>Cannot create the destination folder:
+{0}</value></data>
+  <data name="Msg_Moving" xml:space="preserve"><value>Moving…</value></data>
+  <data name="Msg_Copying" xml:space="preserve"><value>Copying…</value></data>
+  <data name="Msg_ImportError" xml:space="preserve"><value>Import stopped by an error:
+{0}</value></data>
+  <data name="Msg_ImportCancelled" xml:space="preserve"><value>Import cancelled — completed {0} of {1}.</value></data>
+  <data name="Msg_ImportSummaryStatus" xml:space="preserve"><value>Imported {0}, duplicates {1}, errors {2}.</value></data>
+  <data name="Msg_ImportDoneBody" xml:space="preserve"><value>Imported: {0}
+Duplicates: {1}
+Errors: {2}
+Data: {3:0.0} MB</value></data>
+  <data name="Title_ImportDone" xml:space="preserve"><value>Import finished</value></data>
+  <data name="Msg_CantOpenFile" xml:space="preserve"><value>Cannot open the file:
+{0}</value></data>
+  <data name="Title_PickLibrary" xml:space="preserve"><value>Choose the library folder</value></data>
+
+  <!-- Metadata labels -->
+  <data name="Meta_Camera" xml:space="preserve"><value>Camera</value></data>
+  <data name="Meta_Lens" xml:space="preserve"><value>Lens</value></data>
+  <data name="Meta_FocalLength" xml:space="preserve"><value>Focal length</value></data>
+  <data name="Meta_Aperture" xml:space="preserve"><value>Aperture</value></data>
+  <data name="Meta_Shutter" xml:space="preserve"><value>Shutter</value></data>
+  <data name="Meta_Iso" xml:space="preserve"><value>ISO</value></data>
+  <data name="Meta_Mode" xml:space="preserve"><value>Mode</value></data>
+  <data name="Meta_Metering" xml:space="preserve"><value>Metering</value></data>
+  <data name="Meta_WhiteBalance" xml:space="preserve"><value>White balance</value></data>
+  <data name="Meta_Flash" xml:space="preserve"><value>Flash</value></data>
+  <data name="Meta_Focus" xml:space="preserve"><value>Focus</value></data>
+  <data name="Meta_Stabilization" xml:space="preserve"><value>Stabilization</value></data>
+  <data name="Meta_Dro" xml:space="preserve"><value>DRO</value></data>
+  <data name="Meta_Dimensions" xml:space="preserve"><value>Dimensions</value></data>
+  <data name="Meta_Sensor" xml:space="preserve"><value>Sensor</value></data>
+  <data name="Meta_Taken" xml:space="preserve"><value>Taken</value></data>
+
+  <!-- Settings window -->
+  <data name="Settings_Title" xml:space="preserve"><value>Settings — PhotoManager</value></data>
+  <data name="Settings_TabGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="Settings_TabExtensions" xml:space="preserve"><value>Extensions</value></data>
+  <data name="Settings_TabDevices" xml:space="preserve"><value>Devices</value></data>
+  <data name="Settings_DefaultLibrary" xml:space="preserve"><value>Default library folder</value></data>
+  <data name="Settings_FolderPattern" xml:space="preserve"><value>Subfolder layout (from capture date)</value></data>
+  <data name="Settings_DefaultMode" xml:space="preserve"><value>Default import mode</value></data>
+  <data name="Settings_OnDetect" xml:space="preserve"><value>When a camera card is detected</value></data>
+  <data name="Settings_OnDetect_Preview" xml:space="preserve"><value>Open the preview window (I select)</value></data>
+  <data name="Settings_OnDetect_Auto" xml:space="preserve"><value>Import automatically (by profile)</value></data>
+  <data name="Settings_OnDetect_Notify" xml:space="preserve"><value>Only notify (balloon)</value></data>
+  <data name="Settings_Verify" xml:space="preserve"><value>Verify the copy with a checksum (recommended)</value></data>
+  <data name="Settings_Startup" xml:space="preserve"><value>Run at Windows startup</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings_Language_Auto" xml:space="preserve"><value>Automatic (Windows)</value></data>
+  <data name="Settings_PreviewExample" xml:space="preserve"><value>Example:  DSC00123.ARW  →  {0}\DSC00123.ARW</value></data>
+  <data name="Settings_PreviewInvalid" xml:space="preserve"><value>Example: (invalid pattern)</value></data>
+  <data name="Settings_ExtHint" xml:space="preserve"><value>Extensions of imported files — one per line or separated by spaces. The dot is optional.</value></data>
+  <data name="Settings_ExtReset" xml:space="preserve"><value>Restore defaults</value></data>
+  <data name="Settings_DevHint" xml:space="preserve"><value>Remembered devices. You can edit the folder and pattern directly in the table; empty = default value.</value></data>
+  <data name="Settings_DevCol_Device" xml:space="preserve"><value>Device</value></data>
+  <data name="Settings_DevCol_Destination" xml:space="preserve"><value>Destination folder</value></data>
+  <data name="Settings_DevCol_Pattern" xml:space="preserve"><value>Pattern</value></data>
+  <data name="Settings_RemoveDevice" xml:space="preserve"><value>Remove selected</value></data>
+  <data name="Settings_PatternInfo" xml:space="preserve"><value>The layout pattern builds folders from the capture date, e.g. yyyy/yyyy-MM-dd → 2026/2026-07-26. A slash “/” means nesting.</value></data>
+  <data name="Btn_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Btn_Cancel2" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Settings_DefaultLibraryTitle" xml:space="preserve"><value>Default library folder</value></data>
+  <data name="Settings_LangChanged" xml:space="preserve"><value>The language will change after reopening the windows.</value></data>
+
+  <!-- Move library window -->
+  <data name="Move_Title" xml:space="preserve"><value>Move library — PhotoManager</value></data>
+  <data name="Move_From" xml:space="preserve"><value>Library (from):</value></data>
+  <data name="Move_To" xml:space="preserve"><value>New location (to):</value></data>
+  <data name="Move_Info" xml:space="preserve"><value>Moves the whole library along with the duplicate registry. On the same drive it is instant; to another drive (e.g. removable) files are copied with verification and the source is deleted only after a full, correct copy.</value></data>
+  <data name="Move_PickSource" xml:space="preserve"><value>Choose the library to move</value></data>
+  <data name="Move_PickDest" xml:space="preserve"><value>Choose the new library location</value></data>
+  <data name="Move_Btn" xml:space="preserve"><value>Move</value></data>
+  <data name="Move_PickBoth" xml:space="preserve"><value>Choose the source library and the new location.</value></data>
+  <data name="Move_SourceMissing" xml:space="preserve"><value>The source library does not exist or the drive is disconnected.</value></data>
+  <data name="Move_DestUnavailable" xml:space="preserve"><value>The destination drive ({0}) is unavailable.</value></data>
+  <data name="Move_Confirm" xml:space="preserve"><value>Move the library:
+{0}
+→
+{1}
+
+The source will be deleted only after the whole set is copied correctly.</value></data>
+  <data name="Move_ConfirmTitle" xml:space="preserve"><value>Confirm move</value></data>
+  <data name="Move_Working" xml:space="preserve"><value>Moving…</value></data>
+  <data name="Move_Failed" xml:space="preserve"><value>Move failed:
+{0}</value></data>
+  <data name="Move_Cancelled" xml:space="preserve"><value>Cancelled (copied files remain in the new location; source untouched).</value></data>
+  <data name="Move_DoneFast" xml:space="preserve"><value>Moved (instantly, same drive).</value></data>
+  <data name="Move_DoneStatus" xml:space="preserve"><value>Copied {0}, errors {1}. {2}</value></data>
+  <data name="Move_SrcRemoved" xml:space="preserve"><value>Source removed.</value></data>
+  <data name="Move_SrcKept" xml:space="preserve"><value>Source kept (there were errors).</value></data>
+  <data name="Move_DoneMsgFast" xml:space="preserve"><value>The library has been moved.</value></data>
+  <data name="Move_DoneMsg" xml:space="preserve"><value>Files copied: {0}
+Errors: {1}
+Data: {2:0.0} MB
+{3}</value></data>
+  <data name="Move_SrcRemovedFull" xml:space="preserve"><value>The source has been removed.</value></data>
+  <data name="Move_SrcKeptFull" xml:space="preserve"><value>The source was kept due to errors.</value></data>
+  <data name="Move_DoneTitle" xml:space="preserve"><value>Move finished</value></data>
+</root>

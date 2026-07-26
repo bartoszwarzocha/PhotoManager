@@ -3,6 +3,7 @@ using System.Windows;
 using PhotoManager.Core.Config;
 using PhotoManager.Core.Devices;
 using WinForms = System.Windows.Forms;
+using L = PhotoManager.App.Localization.Loc;
 
 namespace PhotoManager.App;
 
@@ -21,6 +22,7 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
 
         _config = AppConfig.Load();
+        Localization.Loc.Apply(_config.Language);
 
         SetupTray();
 
@@ -41,34 +43,52 @@ public partial class App : System.Windows.Application
         // dopiero potem ma sens zachęcać do podłączania aparatu.
         if (string.IsNullOrWhiteSpace(_config.DefaultDestination) && _config.Devices.Count == 0)
         {
-            _tray!.ShowBalloonTip(5000, "PhotoManager — konfiguracja",
-                "Ustaw folder docelowy, aby zacząć.", WinForms.ToolTipIcon.Info);
+            _tray!.ShowBalloonTip(5000, L.Get("Startup_ConfigTitle"),
+                L.Get("Startup_ConfigMsg"), WinForms.ToolTipIcon.Info);
             Dispatcher.BeginInvoke(OpenSettings);
         }
         else
         {
             _tray!.ShowBalloonTip(3000, "PhotoManager",
-                "Działa w tle. Podłącz aparat lub kartę.", WinForms.ToolTipIcon.Info);
+                L.Get("Startup_RunningMsg"), WinForms.ToolTipIcon.Info);
         }
     }
 
     private void SetupTray()
     {
-        var menu = new WinForms.ContextMenuStrip();
-        menu.Items.Add("Importuj ręcznie…", null, (_, _) => OpenManualImport());
-        menu.Items.Add("Przenieś bibliotekę…", null, (_, _) => OpenMoveLibrary());
-        menu.Items.Add("Ustawienia…", null, (_, _) => OpenSettings());
-        menu.Items.Add(new WinForms.ToolStripSeparator());
-        menu.Items.Add("Zakończ", null, (_, _) => ExitApp());
-
         _tray = new WinForms.NotifyIcon
         {
             Icon = LoadTrayIcon(),
             Visible = true,
             Text = "PhotoManager",
-            ContextMenuStrip = menu,
+            ContextMenuStrip = BuildTrayMenu(),
         };
-        _tray.DoubleClick += (_, _) => OpenManualImport();
+        _tray.DoubleClick += (_, _) => OpenWindow();
+    }
+
+    /// <summary>Buduje menu tacki (przebudowywane po zmianie języka).</summary>
+    private WinForms.ContextMenuStrip BuildTrayMenu()
+    {
+        var menu = new WinForms.ContextMenuStrip();
+        var open = menu.Items.Add(L.Get("Tray_Open"), null, (_, _) => OpenWindow());
+        open.Font = new Font(menu.Font, System.Drawing.FontStyle.Bold);
+        menu.Items.Add(L.Get("Tray_ImportManual"), null, (_, _) => OpenManualImport());
+        menu.Items.Add(L.Get("Tray_MoveLibrary"), null, (_, _) => OpenMoveLibrary());
+        menu.Items.Add(L.Get("Tray_Settings"), null, (_, _) => OpenSettings());
+        menu.Items.Add(new WinForms.ToolStripSeparator());
+        menu.Items.Add(L.Get("Tray_Exit"), null, (_, _) => ExitApp());
+        return menu;
+    }
+
+    /// <summary>Otwiera główne okno i dopełnia je aktualnie podłączonymi nośnikami.</summary>
+    private void OpenWindow()
+    {
+        var w = EnsurePreview();
+        foreach (var d in _monitor?.KnownDevices ?? Array.Empty<DeviceInfo>())
+            if (d.Kind == DeviceKind.MassStorage && d.HasDcim && d.PhotoRoot is not null)
+                w.AddSource(d);
+        if (w.WindowState == WindowState.Minimized) w.WindowState = WindowState.Normal;
+        w.Activate();
     }
 
     private static Icon LoadTrayIcon()
@@ -91,22 +111,29 @@ public partial class App : System.Windows.Application
 
         Dispatcher.Invoke(() =>
         {
+            // Jeśli okno jest już otwarte — zawsze dopełnij je nowym źródłem, niezależnie od trybu.
+            if (_preview is not null)
+            {
+                _preview.AddSource(device);
+                return;
+            }
+
             switch (_config.OnDetect)
             {
                 case OnDetectAction.NotifyOnly:
-                    _tray?.ShowBalloonTip(4000, "Wykryto nośnik zdjęć",
-                        $"{device.Name} — kliknij ikonę, aby zaimportować.", WinForms.ToolTipIcon.Info);
+                    _tray?.ShowBalloonTip(4000, L.Get("Detect_Title"),
+                        L.Get("Detect_NotifyOnly", device.Name), WinForms.ToolTipIcon.Info);
                     break;
 
                 case OnDetectAction.AutoImport when HasDestination(device) && DestinationAvailable(device):
-                    _tray?.ShowBalloonTip(4000, "Wykryto nośnik zdjęć",
-                        $"{device.Name} — importuję automatycznie…", WinForms.ToolTipIcon.Info);
+                    _tray?.ShowBalloonTip(4000, L.Get("Detect_Title"),
+                        L.Get("Detect_AutoImport", device.Name), WinForms.ToolTipIcon.Info);
                     _ = AutoImportAsync(device);
                     break;
 
                 default: // ShowPreview (lub AutoImport bez skonfigurowanego folderu)
-                    _tray?.ShowBalloonTip(4000, "Wykryto nośnik zdjęć",
-                        $"{device.Name} — otwieram podgląd importu…", WinForms.ToolTipIcon.Info);
+                    _tray?.ShowBalloonTip(4000, L.Get("Detect_Title"),
+                        L.Get("Detect_ShowPreview", device.Name), WinForms.ToolTipIcon.Info);
                     ShowPreviewFor(device);
                     break;
             }
@@ -136,13 +163,13 @@ public partial class App : System.Windows.Application
         {
             var importer = new Core.Import.Importer();
             var report = await importer.ImportAsync(source, options);
-            _tray?.ShowBalloonTip(5000, "Import zakończony",
-                $"{device.Name}: nowych {report.Imported}, duplikatów {report.Duplicates}, błędów {report.Failed}.",
+            _tray?.ShowBalloonTip(5000, L.Get("AutoImport_DoneTitle"),
+                L.Get("AutoImport_DoneMsg", device.Name, report.Imported, report.Duplicates, report.Failed),
                 WinForms.ToolTipIcon.Info);
         }
         catch (Exception ex)
         {
-            _tray?.ShowBalloonTip(6000, "Import nieudany", ex.Message, WinForms.ToolTipIcon.Error);
+            _tray?.ShowBalloonTip(6000, L.Get("AutoImport_FailTitle"), ex.Message, WinForms.ToolTipIcon.Error);
         }
     }
 
@@ -171,14 +198,14 @@ public partial class App : System.Windows.Application
     private void OpenManualImport()
     {
         // Ręczny import: wskaż folder źródłowy (np. E:\DCIM) i użyj tego samego okna podglądu.
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Wskaż folder ze zdjęciami (np. E:\\DCIM)" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = L.Get("Manual_PickTitle") };
         if (dlg.ShowDialog() != true) return;
 
         var name = System.IO.Path.GetFileName(dlg.FolderName.TrimEnd('\\', '/'));
         var device = new DeviceInfo
         {
             Id = "manual:" + dlg.FolderName,
-            Name = string.IsNullOrEmpty(name) ? "Ręczny wybór" : $"Ręczny: {name}",
+            Name = string.IsNullOrEmpty(name) ? L.Get("Manual_Default") : L.Get("Manual_Prefix", name),
             Kind = DeviceKind.MassStorage,
             RootPath = dlg.FolderName,
             PhotoRoot = dlg.FolderName,
@@ -191,7 +218,12 @@ public partial class App : System.Windows.Application
     {
         var win = new SettingsWindow(_config);
         if (win.ShowDialog() == true)
+        {
             _config.Save();
+            // Zastosuj (ewentualnie) nowy język i przebuduj menu tacki.
+            Localization.Loc.Apply(_config.Language);
+            if (_tray is not null) _tray.ContextMenuStrip = BuildTrayMenu();
+        }
     }
 
     private void OpenMoveLibrary()

@@ -4,6 +4,7 @@ using PhotoManager.Core.Config;
 using PhotoManager.Core.Devices;
 using PhotoManager.Core.Import;
 using MessageBox = System.Windows.MessageBox;
+using L = PhotoManager.App.Localization.Loc;
 
 namespace PhotoManager.App;
 
@@ -27,8 +28,8 @@ public partial class MoveLibraryWindow : Window
         Closing += (_, _) => _cts?.Cancel();
     }
 
-    private void ChangeSource_Click(object sender, RoutedEventArgs e) => Pick(SourceBox, "Wskaż bibliotekę do przeniesienia");
-    private void ChangeDest_Click(object sender, RoutedEventArgs e) => Pick(DestBox, "Wskaż nową lokalizację biblioteki");
+    private void ChangeSource_Click(object sender, RoutedEventArgs e) => Pick(SourceBox, L.Get("Move_PickSource"));
+    private void ChangeDest_Click(object sender, RoutedEventArgs e) => Pick(DestBox, L.Get("Move_PickDest"));
 
     private void Pick(System.Windows.Controls.TextBox box, string title)
     {
@@ -48,31 +49,31 @@ public partial class MoveLibraryWindow : Window
 
         if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(dest))
         {
-            MessageBox.Show(this, "Wskaż bibliotekę źródłową i nową lokalizację.", "PhotoManager",
+            MessageBox.Show(this, L.Get("Move_PickBoth"), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (!Directory.Exists(source))
         {
-            MessageBox.Show(this, "Biblioteka źródłowa nie istnieje lub dysk jest odłączony.", "PhotoManager",
+            MessageBox.Show(this, L.Get("Move_SourceMissing"), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (!Volumes.DriveAvailable(dest))
         {
-            MessageBox.Show(this, $"Dysk docelowy ({Volumes.DriveRoot(dest)}) jest niedostępny.", "PhotoManager",
+            MessageBox.Show(this, L.Get("Move_DestUnavailable", Volumes.DriveRoot(dest)), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         var confirm = MessageBox.Show(this,
-            $"Przenieść bibliotekę:\n{source}\n→\n{dest}\n\nŹródło zostanie usunięte dopiero po poprawnym skopiowaniu całości.",
-            "Potwierdź przeniesienie", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            L.Get("Move_Confirm", source, dest),
+            L.Get("Move_ConfirmTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirm != MessageBoxResult.Yes) return;
 
         _cts = new CancellationTokenSource();
         SetBusy(true);
-        StatusText.Text = "Przenoszenie…";
+        StatusText.Text = L.Get("Move_Working");
 
         var progress = new Progress<MoveProgress>(p =>
         {
@@ -91,7 +92,7 @@ public partial class MoveLibraryWindow : Window
         catch (Exception ex)
         {
             SetBusy(false);
-            MessageBox.Show(this, $"Przenoszenie nieudane:\n{ex.Message}", "PhotoManager",
+            MessageBox.Show(this, L.Get("Move_Failed", ex.Message), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
@@ -101,7 +102,7 @@ public partial class MoveLibraryWindow : Window
         if (cancelled || report is null)
         {
             Progress.Value = 0;
-            StatusText.Text = "Przerwano (skopiowane pliki pozostały w nowej lokalizacji; źródło nietknięte).";
+            StatusText.Text = L.Get("Move_Cancelled");
             return;
         }
 
@@ -114,16 +115,16 @@ public partial class MoveLibraryWindow : Window
 
         Progress.Value = 100;
         if (report.FastMoved)
-            StatusText.Text = "Przeniesiono (błyskawicznie, ten sam dysk).";
+            StatusText.Text = L.Get("Move_DoneFast");
         else
-            StatusText.Text = $"Skopiowano {report.Copied}, błędy {report.Failed}. " +
-                              (report.SourceRemoved ? "Źródło usunięte." : "Źródło pozostawione (były błędy).");
+            StatusText.Text = L.Get("Move_DoneStatus", report.Copied, report.Failed,
+                report.SourceRemoved ? L.Get("Move_SrcRemoved") : L.Get("Move_SrcKept"));
 
         var msg = report.FastMoved
-            ? "Bibliotekę przeniesiono."
-            : $"Skopiowano plików: {report.Copied}\nBłędy: {report.Failed}\nDane: {report.Bytes / 1_048_576.0:0.0} MB\n" +
-              (report.SourceRemoved ? "Źródło zostało usunięte." : "Źródło pozostawiono z powodu błędów.");
-        MessageBox.Show(this, msg, "Przenoszenie zakończone",
+            ? L.Get("Move_DoneMsgFast")
+            : L.Get("Move_DoneMsg", report.Copied, report.Failed, report.Bytes / 1_048_576.0,
+                report.SourceRemoved ? L.Get("Move_SrcRemovedFull") : L.Get("Move_SrcKeptFull"));
+        MessageBox.Show(this, msg, L.Get("Move_DoneTitle"),
             MessageBoxButton.OK, report.Failed > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
     }
 

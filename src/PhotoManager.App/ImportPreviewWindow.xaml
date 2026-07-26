@@ -1,7 +1,8 @@
 <Window x:Class="PhotoManager.App.ImportPreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Import zdjęć" Height="760" Width="1020" MinHeight="520" MinWidth="760"
+        xmlns:loc="clr-namespace:PhotoManager.App.Localization"
+        Title="{loc:T Preview_Title}" Height="760" Width="1020" MinHeight="520" MinWidth="760"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -15,7 +16,7 @@
         <!-- Wybór źródła (obsługa wielu kart naraz) -->
         <StackPanel Grid.Row="0" Margin="0,0,0,8">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Źródło:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{loc:T Preview_Source}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <ComboBox x:Name="SourceCombo" MinWidth="280" DisplayMemberPath="Name"
                           SelectionChanged="SourceCombo_SelectionChanged" />
             </StackPanel>
@@ -30,12 +31,12 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Folder docelowy:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Grid.Column="0" Text="{loc:T Preview_Destination}" VerticalAlignment="Center" Margin="0,0,8,0" />
             <TextBox   Grid.Column="1" x:Name="DestBox" VerticalAlignment="Center" />
-            <Button    Grid.Column="2" Content="Zmień…" Margin="8,0,0,0" Padding="10,3" Click="ChangeDest_Click" />
+            <Button    Grid.Column="2" Content="{loc:T Common_Change}" Margin="8,0,0,0" Padding="10,3" Click="ChangeDest_Click" />
             <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
-                <RadioButton x:Name="CopyRadio" Content="Kopiuj" IsChecked="True" Margin="0,0,10,0" />
-                <RadioButton x:Name="MoveRadio" Content="Przenieś" />
+                <RadioButton x:Name="CopyRadio" Content="{loc:T Common_Copy}" IsChecked="True" Margin="0,0,10,0" />
+                <RadioButton x:Name="MoveRadio" Content="{loc:T Common_Move}" />
             </StackPanel>
         </Grid>
 
@@ -56,7 +57,7 @@
                       SelectionChanged="FilesGrid_SelectionChanged"
                       MouseDoubleClick="FilesGrid_DoubleClick">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Import" Width="60">
+                    <DataGridTemplateColumn Header="{loc:T Col_Import}" Width="60">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -64,10 +65,10 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Nazwa"   Binding="{Binding FileName}"    Width="*"   IsReadOnly="True" />
-                    <DataGridTextColumn Header="Data"    Binding="{Binding DateDisplay}" Width="140" IsReadOnly="True" />
-                    <DataGridTextColumn Header="Rozmiar" Binding="{Binding SizeDisplay}" Width="90"  IsReadOnly="True" />
-                    <DataGridTextColumn Header="Status"  Binding="{Binding Status}"      Width="120" IsReadOnly="True" />
+                    <DataGridTextColumn Header="{loc:T Col_Name}"   Binding="{Binding FileName}"    Width="*"   IsReadOnly="True" />
+                    <DataGridTextColumn Header="{loc:T Col_Date}"   Binding="{Binding DateDisplay}" Width="140" IsReadOnly="True" />
+                    <DataGridTextColumn Header="{loc:T Col_Size}"   Binding="{Binding SizeDisplay}" Width="90"  IsReadOnly="True" />
+                    <DataGridTextColumn Header="{loc:T Col_Status}" Binding="{Binding Status}"      Width="120" IsReadOnly="True" />
                 </DataGrid.Columns>
             </DataGrid>
             </DockPanel>
@@ -80,7 +81,7 @@
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Height="210" Background="#0F000000" CornerRadius="2">
                         <Grid>
-                            <TextBlock x:Name="PreviewHint" Text="Zaznacz zdjęcie, aby zobaczyć podgląd"
+                            <TextBlock x:Name="PreviewHint" Text="{loc:T Preview_Hint}"
                                        Foreground="Gray" TextWrapping="Wrap" TextAlignment="Center"
                                        HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12" />
                             <Image x:Name="PreviewImage" Stretch="Uniform" Margin="4" />
@@ -121,12 +122,12 @@
         <!-- Przyciski -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <TextBlock x:Name="SelectionInfo" VerticalAlignment="Center" Foreground="Gray" Margin="0,0,16,0" />
-            <Button x:Name="CancelButton" Content="Przerwij" Padding="10,4" Margin="0,0,8,0"
+            <Button x:Name="CancelButton" Content="{loc:T Btn_Cancel}" Padding="10,4" Margin="0,0,8,0"
                     Click="Cancel_Click" IsEnabled="False" />
-            <Button Content="Zaznacz nowe" Padding="10,4" Margin="0,0,8,0" Click="SelectNew_Click" />
-            <Button x:Name="ImportButton" Content="Importuj zaznaczone" Padding="14,4" Margin="0,0,8,0"
+            <Button Content="{loc:T Btn_SelectNew}" Padding="10,4" Margin="0,0,8,0" Click="SelectNew_Click" />
+            <Button x:Name="ImportButton" Content="{loc:T Btn_ImportSelected}" Padding="14,4" Margin="0,0,8,0"
                     Click="Import_Click" IsEnabled="False" />
-            <Button x:Name="CloseButton" Content="Zamknij" Padding="12,4" Click="Close_Click" />
+            <Button x:Name="CloseButton" Content="{loc:T Btn_Close}" Padding="12,4" Click="Close_Click" />
         </StackPanel>
     </Grid>
 </Window>

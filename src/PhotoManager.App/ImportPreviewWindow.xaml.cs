@@ -11,6 +11,7 @@ using PhotoManager.Core.Metadata;
 using MessageBox = System.Windows.MessageBox;
 using CheckBox = System.Windows.Controls.CheckBox;
 using TextBlock = System.Windows.Controls.TextBlock;
+using L = PhotoManager.App.Localization.Loc;
 
 namespace PhotoManager.App;
 
@@ -111,7 +112,7 @@ public partial class ImportPreviewWindow : Window
         ImportButton.IsEnabled = false;
         Progress.Value = 0;
         StatusText.ClearValue(TextBlock.ForegroundProperty);
-        StatusText.Text = "Brak podłączonych nośników. Podłącz kartę aparatu.";
+        StatusText.Text = L.Get("Msg_NoMedia");
         UpdateSelectionInfo();
     }
 
@@ -125,7 +126,7 @@ public partial class ImportPreviewWindow : Window
 
     private async Task LoadAndAnalyzeAsync()
     {
-        StatusText.Text = "Wczytywanie listy…";
+        StatusText.Text = L.Get("Msg_LoadingList");
         var exts = _config.ExtensionSet();
 
         // Szybko: tylko ścieżki + rozmiar/nazwa (bez EXIF) — lista pojawia się od razu.
@@ -140,7 +141,7 @@ public partial class ImportPreviewWindow : Window
 
         if (_rows.Count == 0)
         {
-            StatusText.Text = "Brak zdjęć w tym folderze.";
+            StatusText.Text = L.Get("Msg_NoPhotos");
             return;
         }
         ImportButton.IsEnabled = true;
@@ -169,7 +170,7 @@ public partial class ImportPreviewWindow : Window
         {
             ExtFilterPanel.Children.Add(new TextBlock
             {
-                Text = "Pokaż:",
+                Text = L.Get("Filter_Show"),
                 Foreground = System.Windows.Media.Brushes.Gray,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(0, 0, 8, 0),
@@ -210,24 +211,24 @@ public partial class ImportPreviewWindow : Window
         var dest = DestBox.Text.Trim();
         if (string.IsNullOrEmpty(dest))
         {
-            foreach (var r in _rows) r.Status = "nowy";
-            StatusText.Text = "Wskaż folder docelowy, aby wykryć duplikaty.";
+            foreach (var r in _rows) r.State = RowStatus.New;
+            StatusText.Text = L.Get("Msg_PickDestForDup");
             UpdateSelectionInfo();
             return;
         }
         if (!Volumes.DriveAvailable(dest))
         {
-            foreach (var r in _rows) r.Status = "?";
+            foreach (var r in _rows) r.State = RowStatus.Unknown;
             StatusText.Foreground = System.Windows.Media.Brushes.Firebrick;
-            StatusText.Text = $"⚠ Dysk biblioteki ({Volumes.DriveRoot(dest)}) jest odłączony — podłącz go, aby wykryć duplikaty i importować.";
+            StatusText.Text = L.Get("Msg_LibDriveOffline", Volumes.DriveRoot(dest));
             UpdateSelectionInfo();
             return;
         }
-        StatusText.ClearValue(System.Windows.Controls.TextBlock.ForegroundProperty);
+        StatusText.ClearValue(TextBlock.ForegroundProperty);
         if (!Directory.Exists(dest))
         {
-            foreach (var r in _rows) r.Status = "nowy";
-            StatusText.Text = "Folder docelowy jeszcze nie istnieje — wszystkie zdjęcia będą nowe.";
+            foreach (var r in _rows) r.State = RowStatus.New;
+            StatusText.Text = L.Get("Msg_DestNotExist");
             UpdateSelectionInfo();
             return;
         }
@@ -235,7 +236,7 @@ public partial class ImportPreviewWindow : Window
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
         SetBusy(true);
-        StatusText.Text = "Analiza duplikatów…";
+        StatusText.Text = L.Get("Msg_AnalyzingDup");
 
         var byPath = _rows.ToDictionary(r => r.Path);
         var options = new ImportOptions
@@ -251,7 +252,7 @@ public partial class ImportPreviewWindow : Window
             if (byPath.TryGetValue(p.CurrentFile, out var row) && p.LastOutcome is { } outcome)
             {
                 bool dup = outcome == ImportOutcome.SkippedDuplicate;
-                row.Status = dup ? "duplikat" : "nowy";
+                row.State = dup ? RowStatus.Duplicate : RowStatus.New;
                 if (dup) row.Selected = false;
             }
         });
@@ -262,10 +263,10 @@ public partial class ImportPreviewWindow : Window
             await importer.AnalyzeAsync(paths, options, progress, token);
 
             Progress.Value = 0;
-            int dupes = _rows.Count(r => r.Status == "duplikat");
+            int dupes = _rows.Count(r => r.State == RowStatus.Duplicate);
             StatusText.Text = dupes > 0
-                ? $"Gotowe. Duplikatów: {dupes} (odznaczone)."
-                : "Gotowe. Wszystkie zdjęcia są nowe.";
+                ? L.Get("Msg_DoneDupes", dupes)
+                : L.Get("Msg_DoneAllNew");
         }
         catch (OperationCanceledException)
         {
@@ -304,7 +305,7 @@ public partial class ImportPreviewWindow : Window
         var dest = DestBox.Text.Trim();
         if (string.IsNullOrEmpty(dest))
         {
-            MessageBox.Show(this, "Wskaż folder docelowy.", "PhotoManager",
+            MessageBox.Show(this, L.Get("Msg_PickDest"), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -313,7 +314,7 @@ public partial class ImportPreviewWindow : Window
         var selected = _rows.Where(r => r.Selected && ExtEnabled(r)).Select(r => r.Path).ToList();
         if (selected.Count == 0)
         {
-            MessageBox.Show(this, "Nie zaznaczono żadnych plików.", "PhotoManager",
+            MessageBox.Show(this, L.Get("Msg_NoneSelected"), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -322,15 +323,15 @@ public partial class ImportPreviewWindow : Window
         if (mode == ImportMode.Move)
         {
             var ok = MessageBox.Show(this,
-                $"Przenieść {selected.Count} plików? Po zweryfikowanej kopii zostaną skasowane z nośnika.",
-                "Potwierdź przeniesienie", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                L.Get("Msg_ConfirmMove", selected.Count),
+                L.Get("Title_ConfirmMove"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (ok != MessageBoxResult.Yes) return;
         }
 
         if (!Volumes.DriveAvailable(dest))
         {
             MessageBox.Show(this,
-                $"Dysk biblioteki ({Volumes.DriveRoot(dest)}) jest odłączony.\nPodłącz go i spróbuj ponownie.",
+                L.Get("Msg_DestDriveOffline", Volumes.DriveRoot(dest)),
                 "PhotoManager", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -338,7 +339,7 @@ public partial class ImportPreviewWindow : Window
         try { Directory.CreateDirectory(dest); }
         catch (Exception ex)
         {
-            MessageBox.Show(this, $"Nie można utworzyć folderu docelowego:\n{ex.Message}", "PhotoManager",
+            MessageBox.Show(this, L.Get("Msg_CantCreateDest", ex.Message), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
@@ -363,9 +364,9 @@ public partial class ImportPreviewWindow : Window
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
         SetBusy(true, allowClose: false);
-        StatusText.Text = mode == ImportMode.Move ? "Przenoszenie…" : "Kopiowanie…";
+        StatusText.Text = mode == ImportMode.Move ? L.Get("Msg_Moving") : L.Get("Msg_Copying");
 
-        var modeLabel = mode == ImportMode.Move ? "przeniesiono" : "skopiowano";
+        var targetState = mode == ImportMode.Move ? RowStatus.Moved : RowStatus.Copied;
         var byPath = _rows.ToDictionary(r => r.Path);
         var progress = new Progress<ImportProgress>(p =>
         {
@@ -375,12 +376,12 @@ public partial class ImportPreviewWindow : Window
             // Aktualizacja statusu w liście na bieżąco — widoczna także po przerwaniu.
             if (byPath.TryGetValue(p.CurrentFile, out var row) && p.LastOutcome is { } oc)
             {
-                row.Status = oc switch
+                row.State = oc switch
                 {
-                    ImportOutcome.Imported => modeLabel,
-                    ImportOutcome.SkippedDuplicate => "duplikat",
-                    ImportOutcome.Failed => "błąd",
-                    _ => row.Status,
+                    ImportOutcome.Imported => targetState,
+                    ImportOutcome.SkippedDuplicate => RowStatus.Duplicate,
+                    ImportOutcome.Failed => RowStatus.Error,
+                    _ => row.State,
                 };
                 if (oc == ImportOutcome.Imported) row.Selected = false;
             }
@@ -400,7 +401,7 @@ public partial class ImportPreviewWindow : Window
         catch (Exception ex)
         {
             SetBusy(false);
-            MessageBox.Show(this, $"Import przerwany błędem:\n{ex.Message}", "PhotoManager",
+            MessageBox.Show(this, L.Get("Msg_ImportError", ex.Message), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
@@ -410,19 +411,18 @@ public partial class ImportPreviewWindow : Window
         if (cancelled || report is null)
         {
             Progress.Value = 0;
-            int doneSoFar = _rows.Count(r => r.Status == modeLabel);
-            StatusText.Text = $"Import przerwany — ukończono {doneSoFar} z {selected.Count}.";
+            int doneSoFar = _rows.Count(r => r.State == targetState);
+            StatusText.Text = L.Get("Msg_ImportCancelled", doneSoFar, selected.Count);
             UpdateSelectionInfo();
             return;
         }
 
         Progress.Value = 100;
-        StatusText.Text = $"Zaimportowano {report.Imported}, duplikaty {report.Duplicates}, błędy {report.Failed}.";
+        StatusText.Text = L.Get("Msg_ImportSummaryStatus", report.Imported, report.Duplicates, report.Failed);
 
         MessageBox.Show(this,
-            $"Zaimportowano: {report.Imported}\nDuplikaty: {report.Duplicates}\nBłędy: {report.Failed}\n" +
-            $"Dane: {report.BytesImported / 1_048_576.0:0.0} MB",
-            "Import zakończony", MessageBoxButton.OK, MessageBoxImage.Information);
+            L.Get("Msg_ImportDoneBody", report.Imported, report.Duplicates, report.Failed, report.BytesImported / 1_048_576.0),
+            L.Get("Title_ImportDone"), MessageBoxButton.OK, MessageBoxImage.Information);
 
         UpdateSelectionInfo();
     }
@@ -456,7 +456,7 @@ public partial class ImportPreviewWindow : Window
 
         PreviewImage.Source = thumb;
         if (thumb is null) PreviewHint.Visibility = Visibility.Visible;
-        DetailsList.ItemsSource = details.Select(d => new DetailItem(d.Label, d.Value)).ToList();
+        DetailsList.ItemsSource = details.Select(d => new DetailItem(L.Get("Meta_" + d.Label), d.Value)).ToList();
     }
 
     /// <summary>Dwuklik otwiera zdjęcie w skojarzonym programie.</summary>
@@ -469,14 +469,14 @@ public partial class ImportPreviewWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, $"Nie można otworzyć pliku:\n{ex.Message}", "PhotoManager",
+            MessageBox.Show(this, L.Get("Msg_CantOpenFile", ex.Message), "PhotoManager",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
     private async void ChangeDest_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Wybierz folder biblioteki" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = L.Get("Title_PickLibrary") };
         if (!string.IsNullOrEmpty(DestBox.Text) && Directory.Exists(DestBox.Text))
             dlg.InitialDirectory = DestBox.Text;
         if (dlg.ShowDialog() == true)
@@ -491,7 +491,7 @@ public partial class ImportPreviewWindow : Window
         // Zaznacza nowe tylko wśród widocznych (filtr rozszerzeń).
         foreach (var r in _rows)
             if (ExtEnabled(r))
-                r.Selected = r.Status is "nowy" or "…";
+                r.Selected = r.State is RowStatus.New or RowStatus.Pending;
         UpdateSelectionInfo();
     }
 
@@ -510,7 +510,7 @@ public partial class ImportPreviewWindow : Window
     {
         var visible = _rows.Where(ExtEnabled).ToList();
         int sel = visible.Count(r => r.Selected);
-        SelectionInfo.Text = $"Zaznaczono {sel} z {visible.Count}";
+        SelectionInfo.Text = L.Get("Msg_Selected", sel, visible.Count);
     }
 }
 
