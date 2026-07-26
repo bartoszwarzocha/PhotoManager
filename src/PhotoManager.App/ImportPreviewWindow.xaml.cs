@@ -39,6 +39,7 @@ public partial class ImportPreviewWindow : Window
 
         FilesGrid.ItemsSource = _rows;
         SourceCombo.ItemsSource = _sources;
+        VerifyDupMenuItem.IsChecked = _config.VerifyDuplicateContent;
         Closing += (_, _) => _cts?.Cancel();
         ShowEmptyState();
     }
@@ -500,6 +501,95 @@ public partial class ImportPreviewWindow : Window
             if (ExtEnabled(r))
                 r.Selected = r.State is RowStatus.New or RowStatus.Pending;
         UpdateSelectionInfo();
+    }
+
+    private void SelectAll_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var r in _rows) if (ExtEnabled(r)) r.Selected = true;
+        UpdateSelectionInfo();
+    }
+
+    private void SelectNone_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var r in _rows) if (ExtEnabled(r)) r.Selected = false;
+        UpdateSelectionInfo();
+    }
+
+    /// <summary>Odśwież: ponownie wczytaj bieżące źródło i przeanalizuj wobec fizycznej biblioteki.</summary>
+    private async void Refresh_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        if (SourceCombo.SelectedItem is DeviceInfo) await LoadSelectedSourceAsync();
+    }
+
+    /// <summary>Przełącz „sprawdzaj zawartość duplikatów” w locie — zapisz i przeanalizuj od nowa.</summary>
+    private async void VerifyDupMenu_Click(object sender, RoutedEventArgs e)
+    {
+        _config.VerifyDuplicateContent = VerifyDupMenuItem.IsChecked;
+        _config.Save();
+        if (!_busy && _rows.Count > 0) await AnalyzeDuplicatesAsync();
+    }
+
+    private async void Stats_Click(object sender, RoutedEventArgs e)
+    {
+        var dest = DestBox.Text.Trim();
+        if (string.IsNullOrEmpty(dest))
+        {
+            MessageBox.Show(this, L.Get("Stats_NoDest"), "PhotoManager", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        if (!Volumes.DriveAvailable(dest))
+        {
+            MessageBox.Show(this, L.Get("Stats_Offline", Volumes.DriveRoot(dest)), "PhotoManager",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var exts = _config.ExtensionSet();
+        StatusText.Text = L.Get("Stats_Computing");
+        var (count, bytes, folders, range) = await Task.Run(() => ComputeLibraryStats(dest, exts));
+        StatusText.Text = "";
+
+        MessageBox.Show(this,
+            L.Get("Stats_Body", count, HumanSize(bytes), folders, range),
+            L.Get("Stats_Title"), MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private static (int Count, long Bytes, int Folders, string Range) ComputeLibraryStats(
+        string dest, IReadOnlySet<string> exts)
+    {
+        int count = 0; long bytes = 0;
+        var dirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        DateTime min = DateTime.MaxValue, max = DateTime.MinValue;
+        try
+        {
+            foreach (var file in Directory.EnumerateFiles(dest, "*", SearchOption.AllDirectories))
+            {
+                var ext = Path.GetExtension(file);
+                if (string.IsNullOrEmpty(ext) || !exts.Contains(ext)) continue;
+                try
+                {
+                    var fi = new FileInfo(file);
+                    bytes += fi.Length; count++;
+                    dirs.Add(Path.GetDirectoryName(file) ?? "");
+                    var t = fi.LastWriteTime;
+                    if (t < min) min = t;
+                    if (t > max) max = t;
+                }
+                catch { }
+            }
+        }
+        catch { }
+        var range = count > 0 ? $"{min:yyyy-MM-dd} – {max:yyyy-MM-dd}" : "—";
+        return (count, bytes, dirs.Count, range);
+    }
+
+    private static string HumanSize(long bytes)
+    {
+        string[] units = { "B", "KB", "MB", "GB", "TB" };
+        double v = bytes; int u = 0;
+        while (v >= 1024 && u < units.Length - 1) { v /= 1024; u++; }
+        return $"{v:0.#} {units[u]}";
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close(); // Closing anuluje bieżącą operację

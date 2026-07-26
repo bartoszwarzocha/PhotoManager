@@ -97,6 +97,24 @@ Data: {3:0.0} MB</value></data>
 {0}</value></data>
   <data name="Title_PickLibrary" xml:space="preserve"><value>Choose the library folder</value></data>
 
+  <!-- Preview menu bar -->
+  <data name="Menu_Select" xml:space="preserve"><value>Selection</value></data>
+  <data name="Menu_SelectAll" xml:space="preserve"><value>Select all</value></data>
+  <data name="Menu_SelectNone" xml:space="preserve"><value>Deselect all</value></data>
+  <data name="Menu_Library" xml:space="preserve"><value>Library</value></data>
+  <data name="Menu_Stats" xml:space="preserve"><value>Library statistics…</value></data>
+  <data name="Menu_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Menu_Options" xml:space="preserve"><value>Options</value></data>
+  <data name="Menu_VerifyDup" xml:space="preserve"><value>Check duplicate contents (slower)</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>Library statistics</value></data>
+  <data name="Stats_Computing" xml:space="preserve"><value>Computing library statistics…</value></data>
+  <data name="Stats_Body" xml:space="preserve"><value>Photos/videos: {0}
+Total size: {1}
+Date folders: {2}
+Range: {3}</value></data>
+  <data name="Stats_NoDest" xml:space="preserve"><value>Choose a library folder first.</value></data>
+  <data name="Stats_Offline" xml:space="preserve"><value>Library drive ({0}) is disconnected.</value></data>
+
   <!-- Metadata labels -->
   <data name="Meta_Camera" xml:space="preserve"><value>Camera</value></data>
   <data name="Meta_Lens" xml:space="preserve"><value>Lens</value></data>

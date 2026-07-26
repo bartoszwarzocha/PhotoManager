@@ -4,6 +4,22 @@
         xmlns:loc="clr-namespace:PhotoManager.App.Localization"
         Title="{loc:T Preview_Title}" Height="760" Width="1020" MinHeight="520" MinWidth="760"
         WindowStartupLocation="CenterScreen">
+    <DockPanel>
+    <Menu DockPanel.Dock="Top">
+        <MenuItem Header="{loc:T Menu_Select}">
+            <MenuItem Header="{loc:T Menu_SelectAll}"  Click="SelectAll_Click" />
+            <MenuItem Header="{loc:T Menu_SelectNone}" Click="SelectNone_Click" />
+            <MenuItem Header="{loc:T Btn_SelectNew}"   Click="SelectNew_Click" />
+        </MenuItem>
+        <MenuItem Header="{loc:T Menu_Library}">
+            <MenuItem Header="{loc:T Menu_Stats}"   Click="Stats_Click" />
+            <MenuItem Header="{loc:T Menu_Refresh}" Click="Refresh_Click" />
+        </MenuItem>
+        <MenuItem Header="{loc:T Menu_Options}">
+            <MenuItem x:Name="VerifyDupMenuItem" Header="{loc:T Menu_VerifyDup}"
+                      IsCheckable="True" Click="VerifyDupMenu_Click" />
+        </MenuItem>
+    </Menu>
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -130,4 +146,5 @@
             <Button x:Name="CloseButton" Content="{loc:T Btn_Close}" Padding="12,4" Click="Close_Click" />
         </StackPanel>
     </Grid>
+    </DockPanel>
 </Window>
