@@ -169,7 +169,7 @@ Range: {3}</value></data>
   <data name="Move_Title" xml:space="preserve"><value>Move library — PhotoManager</value></data>
   <data name="Move_From" xml:space="preserve"><value>Library (from):</value></data>
   <data name="Move_To" xml:space="preserve"><value>New location (to):</value></data>
-  <data name="Move_Info" xml:space="preserve"><value>Moves the whole library along with the duplicate registry. On the same drive it is instant; to another drive (e.g. removable) files are copied with verification and the source is deleted only after a full, correct copy.</value></data>
+  <data name="Move_Info" xml:space="preserve"><value>Moves the whole library to a new location. On the same drive it is instant; to another drive (e.g. removable) files are copied with verification and the source is deleted only after a full, correct copy.</value></data>
   <data name="Move_PickSource" xml:space="preserve"><value>Choose the library to move</value></data>
   <data name="Move_PickDest" xml:space="preserve"><value>Choose the new library location</value></data>
   <data name="Move_Btn" xml:space="preserve"><value>Move</value></data>

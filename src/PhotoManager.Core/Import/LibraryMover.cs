@@ -14,7 +14,7 @@ public sealed class MoveReport
 }
 
 /// <summary>
-/// Przenosi całą bibliotekę (wraz z manifestem, którego ścieżki są względne) do nowej lokalizacji —
+/// Przenosi całą bibliotekę (wszystkie pliki i podfoldery) do nowej lokalizacji —
 /// np. na dysk przenośny. Na tym samym woluminie robi to natychmiast; między dyskami kopiuje
 /// z weryfikacją skrótu i kasuje źródło dopiero, gdy wszystko się powiedzie.
 /// </summary>

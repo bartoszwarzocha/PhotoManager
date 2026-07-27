@@ -5,8 +5,8 @@ namespace PhotoManager.Core.Import;
 
 /// <summary>
 /// Silnik importu zdjęć z nośnika do biblioteki docelowej: organizacja wg daty EXIF,
-/// deduplikacja po skrócie zawartości (manifest) oraz bezpieczne przenoszenie
-/// (kasowanie źródła dopiero po zweryfikowanej kopii).
+/// deduplikacja przez porównanie z fizyczną biblioteką (per plik, bez rejestru) oraz
+/// bezpieczne przenoszenie (kasowanie źródła dopiero po zweryfikowanej kopii).
 /// </summary>
 public sealed class Importer
 {

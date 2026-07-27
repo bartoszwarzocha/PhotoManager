@@ -15,9 +15,9 @@ Mass Storage and MTP modes) and multi-slot card readers.
   phones in MTP/PTP mode (via Windows Portable Devices). Reacts to `WM_DEVICECHANGE`.
 - **Fast import** with date-based organization from EXIF into a `YYYY/YYYY-MM-DD` pattern
   (configurable).
-- **Deduplication without scanning the whole library** — recognized by size and name from a
-  persistent manifest; SHA-256 hashing only on collisions. For RAW files this means **zero
-  redundant reading** on re-import.
+- **Deduplication by comparing against the physical library** — each file is matched to its place
+  in the library (date folder + name + size), with no registry. A file deleted from the library
+  correctly reappears as new; optional content verification (checksum) guards against corrupted copies.
 - **Preview window** with a file list, **thumbnail**, and **metadata details** (camera, lens, ISO,
   aperture, shutter, focal length, dimensions, native RAW resolution, Sony fields). Double-click
   opens the photo in the associated application.
@@ -27,7 +27,7 @@ Mass Storage and MTP modes) and multi-slot card readers.
   verified copy. Operations are fully cancellable.
 - **Removable drives** — a clear message when the library is disconnected; the library is located
   by volume serial number even if the drive letter changes.
-- **Move the library** between folders / to a removable drive (manifest updated automatically).
+- **Move the library** between folders / to a removable drive.
 - **System tray app** with a custom icon, autostart, and `config.json` (per-device profiles).
 
 > **Note:** the user interface is currently **Polish only** (localization is planned).
@@ -69,7 +69,7 @@ src/
   PhotoManager.Core/            # GUI-independent logic
     Devices/                    # device detection, volumes (serial)
     Metadata/                   # EXIF/MakerNotes date and details
-    Import/                     # import engine, dedup, manifest, library move
+    Import/                     # import engine, dedup (physical comparison), library move
     Config/                     # config.json, device profiles
   PhotoManager.App/             # WPF system-tray application
   PhotoManager.ConsoleHarness/  # CLI harness (detection, import, metadata diagnostics)

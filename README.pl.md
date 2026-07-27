@@ -14,9 +14,9 @@ tryb Mass Storage i MTP) oraz czytników wielogniazdowych.
 - **Wykrywanie sprzętu w tle** — dyski wymienne (litera + folder `DCIM`) oraz aparaty/telefony
   w trybie MTP/PTP (przez Windows Portable Devices). Reakcja na `WM_DEVICECHANGE`.
 - **Szybki import** z organizacją wg daty EXIF do wzorca `RRRR/RRRR-MM-DD` (konfigurowalny).
-- **Deduplikacja bez skanowania całej biblioteki** — rozpoznanie po rozmiarze i nazwie z trwałego
-  manifestu; skrót SHA-256 liczony tylko w razie kolizji. Dla plików RAW oznacza to **zero
-  zbędnego czytania** przy powtórnym imporcie.
+- **Deduplikacja przez porównanie z fizyczną biblioteką** — każdy plik dopasowywany do swojego
+  miejsca w bibliotece (folder wg daty + nazwa + rozmiar), bez rejestru. Plik skasowany z biblioteki
+  wraca jako nowy; opcjonalna weryfikacja zawartości (skrótem) chroni przed uszkodzoną kopią.
 - **Okno podglądu** z listą zdjęć, **miniaturą** i **szczegółami metadanych** (aparat, obiektyw,
   ISO, przysłona, czas, ogniskowa, wymiary, natywna rozdzielczość RAW, pola Sony). Dwuklik
   otwiera zdjęcie w skojarzonym programie.
@@ -26,7 +26,7 @@ tryb Mass Storage i MTP) oraz czytników wielogniazdowych.
   pewnej kopii. Operacje w pełni anulowalne.
 - **Dyski przenośne** — czytelny komunikat, gdy biblioteka jest odłączona; odnajdywanie biblioteki
   po numerze seryjnym woluminu, nawet po zmianie litery dysku.
-- **Przenoszenie biblioteki** między katalogami / na dysk przenośny (z aktualizacją manifestu).
+- **Przenoszenie biblioteki** między katalogami / na dysk przenośny.
 - **Aplikacja w zasobniku** z własną ikoną, autostartem i `config.json` (profile per urządzenie).
 
 ## Pobierz
@@ -66,7 +66,7 @@ src/
   PhotoManager.Core/            # logika niezależna od GUI
     Devices/                    # wykrywanie urządzeń, woluminy (serial)
     Metadata/                   # data i szczegóły EXIF/MakerNotes
-    Import/                     # silnik importu, deduplikacja, manifest, przenoszenie biblioteki
+    Import/                     # silnik importu, deduplikacja (porównanie fizyczne), przenoszenie biblioteki
     Config/                     # config.json, profile urządzeń
   PhotoManager.App/             # aplikacja WPF w zasobniku
   PhotoManager.ConsoleHarness/  # tester CLI (wykrywanie, import, diagnostyka metadanych)

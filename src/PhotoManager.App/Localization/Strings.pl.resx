@@ -161,7 +161,7 @@ Zakres: {3}</value></data>
   <data name="Move_Title" xml:space="preserve"><value>Przenieś bibliotekę — PhotoManager</value></data>
   <data name="Move_From" xml:space="preserve"><value>Biblioteka (skąd):</value></data>
   <data name="Move_To" xml:space="preserve"><value>Nowa lokalizacja (dokąd):</value></data>
-  <data name="Move_Info" xml:space="preserve"><value>Przeniesie całą bibliotekę wraz z rejestrem duplikatów. Na tym samym dysku jest to natychmiastowe; na inny dysk (np. przenośny) pliki są kopiowane z weryfikacją, a źródło kasowane dopiero po pełnym, poprawnym skopiowaniu.</value></data>
+  <data name="Move_Info" xml:space="preserve"><value>Przeniesie całą bibliotekę do nowej lokalizacji. Na tym samym dysku jest to natychmiastowe; na inny dysk (np. przenośny) pliki są kopiowane z weryfikacją, a źródło kasowane dopiero po pełnym, poprawnym skopiowaniu.</value></data>
   <data name="Move_PickSource" xml:space="preserve"><value>Wskaż bibliotekę do przeniesienia</value></data>
   <data name="Move_PickDest" xml:space="preserve"><value>Wskaż nową lokalizację biblioteki</value></data>
   <data name="Move_Btn" xml:space="preserve"><value>Przenieś</value></data>
